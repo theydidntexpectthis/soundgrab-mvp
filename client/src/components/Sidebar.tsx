@@ -50,16 +50,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.path}>
-              <Link href={item.path}>
-                <a className={cn(
+              <Link href={item.path} className={cn(
                   "flex items-center p-2 rounded-lg group transition-all",
                   isActive(item.path) 
                     ? "bg-surface-light text-primary" 
                     : "hover:bg-surface-light text-text-primary"
                 )}>
-                  <item.icon className="w-6 h-6 mr-2" />
-                  <span>{item.label}</span>
-                </a>
+                <item.icon className="w-6 h-6 mr-2" />
+                <span>{item.label}</span>
               </Link>
             </li>
           ))}

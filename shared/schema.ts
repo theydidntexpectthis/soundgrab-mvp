@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,3 +15,32 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Track interface for audio tracks
+export interface Track {
+  id: string;
+  videoId: string;
+  title: string;
+  artist: string;
+  thumbnailUrl?: string;
+  duration: number;
+  views: number;
+  description?: string;
+  publishDate?: string;
+  lyrics?: string;
+  audioUrl?: string;
+}
+
+// Search results interface
+export interface SearchResult {
+  mainResult: Track;
+  otherResults: Track[];
+}
+
+// Search history type
+export interface SearchHistory {
+  id: string;
+  query: string;
+  timestamp: Date;
+  results: Track[];
+}
