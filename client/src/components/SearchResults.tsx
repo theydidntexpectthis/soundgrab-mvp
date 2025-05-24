@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WaveAnimation } from "./WaveAnimation";
 import { ProgressRing } from "./ProgressRing";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { Track, SearchResult } from "@shared/schema";
 import { usePlayback } from "./Layout";
+import { searchTracks, downloadTrack, getLyrics } from "@/services/apiService";
 import { 
   Play, Download, MoreVertical, Music, Clock, Calendar,
   ChevronDown, File, FileVideo, List
@@ -36,7 +36,8 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
     isLoading, 
     isError 
   } = useQuery<SearchResult>({
-    queryKey: [`/api/search?q=${encodeURIComponent(searchQuery)}&sort=${sortBy}`],
+    queryKey: [`search-${searchQuery}-${sortBy}`],
+    queryFn: () => searchTracks(searchQuery, sortBy),
     enabled: !!searchQuery,
   });
   
@@ -47,39 +48,24 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
         description: `Preparing ${track.title} for download...`
       });
       
-      const response = await apiRequest("POST", "/api/downloads", {
-        videoId: track.videoId,
-        format,
-        title: track.title,
-        artist: track.artist
-      });
+      // Use our API service to download the track
+      const downloadUrl = await downloadTrack(track, format);
       
-      // Check if the response is successful
-      if (response.ok) {
-        const data = await response.json();
+      if (downloadUrl) {
+        // Create a hidden anchor to trigger download
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = `${track.artist} - ${track.title}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         
-        if (data.downloadUrl) {
-          // Create a hidden anchor to trigger download
-          const a = document.createElement("a");
-          a.href = data.downloadUrl;
-          a.download = `${track.artist} - ${track.title}.${format}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          
-          toast({
-            title: "Download started",
-            description: `${track.title} will be downloaded shortly`
-          });
-        } else {
-          // Handle server-side processing
-          toast({
-            title: "Processing download",
-            description: "Your download is being prepared and will start automatically"
-          });
-        }
+        toast({
+          title: "Download started",
+          description: `${track.title} will be downloaded shortly`
+        });
       } else {
-        throw new Error("Download failed");
+        throw new Error("Download URL not received");
       }
     } catch (error) {
       console.error("Download error:", error);
