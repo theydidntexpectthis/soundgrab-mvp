@@ -43,4 +43,5 @@ export interface SearchHistory {
   query: string;
   timestamp: Date;
   results: Track[];
+  track?: Track; // Optional track directly associated with this search
 }

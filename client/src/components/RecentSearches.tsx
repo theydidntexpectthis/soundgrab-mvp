@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Play } from "lucide-react";
 import { SearchHistory } from "@shared/schema";
 import { usePlayback } from "./Layout";
+import { getSearchHistory } from "@/services/apiService";
 
 interface RecentSearchesProps {
   onSelect: (query: string) => void;
@@ -12,7 +13,8 @@ interface RecentSearchesProps {
 
 export function RecentSearches({ onSelect }: RecentSearchesProps) {
   const { data: recentSearches, isLoading } = useQuery<SearchHistory[]>({
-    queryKey: ["/api/searches/recent"],
+    queryKey: ['search-history'],
+    queryFn: () => getSearchHistory(),
   });
   
   const { setCurrentTrack, addToQueue } = usePlayback();

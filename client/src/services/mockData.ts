@@ -72,19 +72,22 @@ export const mockSearchHistory = [
     id: "1",
     query: "never gonna give you up",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    results: [mockTracks[0]]
+    results: [mockTracks[0]],
+    track: mockTracks[0]
   },
   {
     id: "2",
     query: "sandstorm",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    results: [mockTracks[1]]
+    results: [mockTracks[1]],
+    track: mockTracks[1]
   },
   {
     id: "3",
     query: "gangnam style",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-    results: [mockTracks[2]]
+    results: [mockTracks[2]],
+    track: mockTracks[2]
   }
 ];
 
