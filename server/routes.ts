@@ -244,8 +244,8 @@ async function getVideoDetails(videoId: string): Promise<Track> {
       thumbnailUrl: videoDetails.thumbnails.length > 0 ? videoDetails.thumbnails[0].url : undefined,
       duration: parseInt(videoDetails.lengthSeconds),
       views: parseInt(videoDetails.viewCount),
-      description: videoDetails.description,
-      publishDate: videoDetails.publishDate
+      description: typeof videoDetails.description === 'string' ? videoDetails.description : undefined,
+      publishDate: typeof videoDetails.publishDate === 'string' ? videoDetails.publishDate : undefined
     };
   } catch (error) {
     console.error(`Error getting video details for ${videoId}:`, error);
