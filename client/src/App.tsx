@@ -10,6 +10,7 @@ import RecentPage from "@/pages/recent";
 import DownloadsPage from "@/pages/downloads";
 import SettingsPage from "@/pages/settings";
 import LyricsSearchPage from "@/pages/lyrics-search";
+import VoiceSearchPage from "@/pages/voice-search";
 import { Layout } from "@/components/Layout";
 
 function Router() {
