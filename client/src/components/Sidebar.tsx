@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   Home, Search, History, Download, Settings, 
-  Headphones, Menu, X 
+  Headphones, Menu, X, Music
 } from "lucide-react";
 
 interface SidebarProps {
@@ -19,6 +19,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Search, label: "Search", path: "/search" },
+    { icon: Music, label: "Lyrics Search", path: "/lyrics-search" },
     { icon: History, label: "Recent", path: "/recent" },
     { icon: Download, label: "Downloads", path: "/downloads" },
     { icon: Settings, label: "Settings", path: "/settings" },
