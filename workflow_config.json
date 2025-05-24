@@ -1,4 +1,0 @@
-{
-  "workflowName": "Start application",
-  "command": "npm run dev"
-}
