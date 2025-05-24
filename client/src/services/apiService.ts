@@ -1,6 +1,6 @@
 import { SearchResult, Track } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { mockSearchResults, mockSearchHistory, mockDownloads } from "./mockData";
+import { mockSearchResults, mockSearchHistory, mockDownloads, mockTracks } from "./mockData";
 
 // Flag to toggle between mock data and real API
 const USE_MOCK_DATA = true; // Set to false when API is ready
@@ -16,6 +16,12 @@ export async function searchTracks(query: string, sortBy: string = 'relevance'):
     console.log("Using mock search data");
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Check if this looks like a lyrics search (longer query)
+    if (query.split(' ').length > 6) {
+      return searchByLyrics(query);
+    }
+    
     return mockSearchResults;
   }
   
@@ -23,6 +29,49 @@ export async function searchTracks(query: string, sortBy: string = 'relevance'):
   
   if (!response.ok) {
     throw new Error('Failed to search for tracks');
+  }
+  
+  return response.json();
+}
+
+/**
+ * Search specifically for tracks by lyrics
+ * @param lyrics Lyrics snippet to search for
+ * @returns Search results matching the lyrics
+ */
+export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
+  if (USE_MOCK_DATA) {
+    console.log("Using mock lyrics search");
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // For demo purposes, if the lyrics contain specific words, return matching tracks
+    const lyricsLower = lyrics.toLowerCase();
+    let mainResult = mockTracks[0]; // Default to first track
+    
+    if (lyricsLower.includes("never gonna give you up") || lyricsLower.includes("strangers to love")) {
+      mainResult = mockTracks[0]; // Rick Astley
+    } else if (lyricsLower.includes("gangnam") || lyricsLower.includes("style")) {
+      mainResult = mockTracks[2]; // Gangnam Style
+    } else if (lyricsLower.includes("despacito")) {
+      mainResult = mockTracks[3]; // Despacito
+    } else if (lyricsLower.includes("shape of you") || lyricsLower.includes("bed of my love")) {
+      mainResult = mockTracks[4]; // Shape of You
+    }
+    
+    // Filter out the main result from other results
+    const otherResults = mockTracks.filter(track => track.id !== mainResult.id);
+    
+    return {
+      mainResult,
+      otherResults: otherResults.slice(0, 4) // Limit to 4 other results
+    };
+  }
+  
+  const response = await apiRequest("GET", `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to search by lyrics');
   }
   
   return response.json();

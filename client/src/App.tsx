@@ -8,6 +8,8 @@ import Home from "@/pages/home";
 import SearchPage from "@/pages/search";
 import RecentPage from "@/pages/recent";
 import DownloadsPage from "@/pages/downloads";
+import SettingsPage from "@/pages/settings";
+import LyricsSearchPage from "@/pages/lyrics-search";
 import { Layout } from "@/components/Layout";
 
 function Router() {
@@ -17,8 +19,10 @@ function Router() {
         {/* Main routes */}
         <Route path="/" component={Home} />
         <Route path="/search" component={SearchPage} />
+        <Route path="/lyrics-search" component={LyricsSearchPage} />
         <Route path="/recent" component={RecentPage} />
         <Route path="/downloads" component={DownloadsPage} />
+        <Route path="/settings" component={SettingsPage} />
         {/* Fallback to 404 */}
         <Route component={NotFound} />
       </Switch>
