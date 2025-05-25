@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "./vercel-build.sh",
+  "buildCommand": "cd client && npm install && node vercel-build.js",
   "outputDirectory": "client/dist",
   "routes": [
     { "handle": "filesystem" },

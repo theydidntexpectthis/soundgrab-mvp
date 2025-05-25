@@ -4,18 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    {
-      name: 'typescript-skip-errors',
-      // Skip TypeScript errors during build
-      handleHotUpdate({ file, server }) {
-        if (file.endsWith('.ts') || file.endsWith('.tsx')) {
-          return [];
-        }
-      },
-    }
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
@@ -25,27 +14,8 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    // Skip TypeScript type checking during build
-    rollupOptions: {
-      onwarn(warning, warn) {
-        if (warning.code === 'TYPESCRIPT_ERROR') return;
-        warn(warning);
-      },
-    },
   },
   esbuild: {
-    // Skip TypeScript type checking during build
-    tsconfigRaw: JSON.stringify({
-      compilerOptions: {
-        target: "esnext",
-        module: "esnext",
-        moduleResolution: "node",
-        jsx: "preserve",
-        skipLibCheck: true,
-        noEmitOnError: false,
-        strict: false,
-        noImplicitAny: false
-      }
-    })
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 });
