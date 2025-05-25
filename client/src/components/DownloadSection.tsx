@@ -107,7 +107,8 @@ export function DownloadSection() {
                       </div>
                       <div className="flex items-center">
                         <span className="text-text-secondary text-xs mr-3">
-                          {formatFileSize(download.downloadedBytes)} / {formatFileSize(download.totalBytes)}
+                          {download.fileSize ? formatFileSize(download.fileSize * (download.progress / 100)) : '0 KB'} / 
+                          {download.fileSize ? formatFileSize(download.fileSize) : 'Unknown'}
                         </span>
                         <Button 
                           variant="ghost" 
