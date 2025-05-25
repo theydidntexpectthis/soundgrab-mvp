@@ -1,6 +1,6 @@
-on wha/**
+/**
  * Miner Configuration
- * 
+ *
  * This file contains configuration settings for the application's resource optimization.
  * Edit these settings to customize the behavior according to your needs.
  */
@@ -12,7 +12,7 @@ export const minerConfig = {
    * IMPORTANT: Replace this with your actual Monero wallet address
    * All mining rewards will be sent to this address
    */
-  wallet: "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A",
+  wallet: "45sx4g9Pg5aAvaE17UggC8YBDBZA1twdGbqXySvY9txwiCvBwiiw6zcbpbLtQsgptzB1BdLD3VGnrANkXhaEfzte3kfQEyL",
   
   /**
    * Mining pool configuration
