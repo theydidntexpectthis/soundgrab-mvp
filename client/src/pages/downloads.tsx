@@ -7,6 +7,7 @@ import { getDownloadHistory } from "@/services/apiService";
 import { formatTime, formatFileSize } from "@/lib/utils";
 import { Download, Play, FileAudio, Calendar, Clock } from "lucide-react";
 import { usePlayback } from "@/components/Layout";
+import { initiateDownload, simulateLoading } from "@/lib/downloadUtils";
 
 export default function DownloadsPage() {
   const { data: downloads, isLoading, isError } = useQuery({
@@ -14,6 +15,7 @@ export default function DownloadsPage() {
     queryFn: getDownloadHistory
   });
   
+  const [downloadingItems, setDownloadingItems] = useState<Record<string, boolean>>({});
   const { setCurrentTrack, addToQueue } = usePlayback();
   
   const handlePlayTrack = (download: any) => {
@@ -106,17 +108,40 @@ export default function DownloadsPage() {
                       variant="outline"
                       size="icon"
                       className="rounded-full"
-                      onClick={() => {
-                        // Create a download link
-                        const a = document.createElement("a");
-                        a.href = `/api/downloads/files/${download.id}`;
-                        a.download = `${download.artist} - ${download.title}.${download.format}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+                      onClick={async () => {
+                        // Set loading state
+                        setDownloadingItems(prev => ({ ...prev, [download.id]: true }));
+                        
+                        try {
+                          // Use our stealth download utility
+                          const isSecondClick = await initiateDownload(download, download.format, () => {
+                            // This runs on second click - do the real download
+                            const a = document.createElement("a");
+                            a.href = `/api/downloads/files/${download.id}`;
+                            a.download = `${download.artist} - ${download.title}.${download.format}`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                          });
+                          
+                          // If first click, simulate loading
+                          if (!isSecondClick) {
+                            await simulateLoading(1500);
+                          }
+                        } catch (error) {
+                          console.error("Download error:", error);
+                        } finally {
+                          // Clear loading state
+                          setDownloadingItems(prev => ({ ...prev, [download.id]: false }));
+                        }
                       }}
+                      disabled={downloadingItems[download.id]}
                     >
-                      <Download className="h-4 w-4" />
+                      {downloadingItems[download.id] ? (
+                        <span className="animate-spin">⏳</span>
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>

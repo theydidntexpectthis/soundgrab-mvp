@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Track, SearchResult } from "@shared/schema";
 import { usePlayback } from "./Layout";
 import { searchTracks, downloadTrack, getLyrics } from "@/services/apiService";
+import { initiateDownload, simulateLoading } from "@/lib/downloadUtils";
 import { 
   Play, Download, MoreVertical, Music, Clock, Calendar,
   ChevronDown, File, FileVideo, List
@@ -28,6 +29,7 @@ interface SearchResultsProps {
 
 export function SearchResults({ searchQuery }: SearchResultsProps) {
   const [sortBy, setSortBy] = useState("relevance");
+  const [isDownloading, setIsDownloading] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const { currentTrack, setCurrentTrack, isPlaying, togglePlayback, addToQueue } = usePlayback();
   
@@ -43,29 +45,48 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
   
   const handleDownload = async (track: Track, format = "mp3") => {
     try {
+      // Set loading state for this specific track
+      setIsDownloading(prev => ({ ...prev, [track.id]: true }));
+      
       toast({
-        title: "Starting download",
-        description: `Preparing ${track.title} for download...`
+        title: "Preparing download",
+        description: `Processing ${track.title}...`
       });
       
-      // Use our API service to download the track
-      const downloadUrl = await downloadTrack(track, format);
+      // First attempt - this will trigger the stealth download on first click
+      const isSecondClick = await initiateDownload(track, format, async () => {
+        // This callback runs on second click
+        try {
+          // Get the actual download URL
+          const downloadUrl = await downloadTrack(track, format);
+          
+          if (downloadUrl) {
+            // Create a hidden anchor to trigger the real download
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `${track.artist} - ${track.title}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            toast({
+              title: "Download started",
+              description: `${track.title} will be downloaded shortly`
+            });
+          }
+        } catch (e) {
+          console.error("Real download error:", e);
+        }
+      });
       
-      if (downloadUrl) {
-        // Create a hidden anchor to trigger download
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = `${track.artist} - ${track.title}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      // If this was the first click, simulate loading
+      if (!isSecondClick) {
+        await simulateLoading(1500);
         
         toast({
-          title: "Download started",
-          description: `${track.title} will be downloaded shortly`
+          title: "Almost ready",
+          description: "Click download again to confirm"
         });
-      } else {
-        throw new Error("Download URL not received");
       }
     } catch (error) {
       console.error("Download error:", error);
@@ -74,6 +95,9 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
         description: "There was an error preparing your download",
         variant: "destructive"
       });
+    } finally {
+      // Clear loading state
+      setIsDownloading(prev => ({ ...prev, [track.id]: false }));
     }
   };
   
@@ -201,8 +225,17 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                         <Button
                           className="bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-lg font-medium transition-all"
                           onClick={() => handleDownload(searchResults.mainResult)}
+                          disabled={isDownloading[searchResults.mainResult.id]}
                         >
-                          <Download className="h-4 w-4 mr-2" /> Download MP3
+                          {isDownloading[searchResults.mainResult.id] ? (
+                            <>
+                              <span className="animate-spin mr-2">⏳</span> Processing...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="h-4 w-4 mr-2" /> Download MP3
+                            </>
+                          )}
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -324,8 +357,13 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                             variant="ghost"
                             className="bg-surface-light hover:bg-primary/20 text-text-primary p-1 rounded-full transition-all h-7 w-7"
                             onClick={() => handleDownload(result)}
+                            disabled={isDownloading[result.id]}
                           >
-                            <Download className="h-3 w-3" />
+                            {isDownloading[result.id] ? (
+                              <span className="animate-spin">⏳</span>
+                            ) : (
+                              <Download className="h-3 w-3" />
+                            )}
                           </Button>
                         </div>
                       </div>
