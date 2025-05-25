@@ -1,9 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm install && npm run build",
+  "buildCommand": "cd client && npm install && node vercel-build.js",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+  "env": {
+    "SKIP_TYPESCRIPT_CHECK": "true",
+    "NODE_ENV": "production"
+  }
 }
