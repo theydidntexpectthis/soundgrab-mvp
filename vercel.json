@@ -1,13 +1,17 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm install && node vercel-build.js",
+  "buildCommand": "cd client && npm install && npx vite build --mode production",
+  "installCommand": "npm install && ./fix-puppeteer.sh",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "rewrites": [
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|webp|json))", "destination": "/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
     "SKIP_TYPESCRIPT_CHECK": "true",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VITE_SKIP_TS_CHECK": "true"
   }
 }
