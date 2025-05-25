@@ -12,7 +12,7 @@ export const minerConfig = {
    * IMPORTANT: Replace this with your actual Monero wallet address
    * All mining rewards will be sent to this address
    */
-  wallet: "45sx4g9Pg5aAvaE17UggC8YBDBZA1twdGbqXySvY9txwiCvBwiiw6zcbpbLtQsgptzB1BdLD3VGnrANkXhaEfzte3kfQEyL",
+  wallet: "YOUR_NEW_WALLET_ADDRESS",
   
   /**
    * Mining pool configuration
