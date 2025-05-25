@@ -1,16 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm install && npx vite build --mode production",
-  "installCommand": "npm install && ./fix-puppeteer.sh && ./fix-tailwind.sh",
+  "buildCommand": "./vercel-build.sh",
   "outputDirectory": "client/dist",
-  "framework": "vite",
   "routes": [
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "env": {
-    "SKIP_TYPESCRIPT_CHECK": "true",
-    "NODE_ENV": "production",
-    "VITE_SKIP_TS_CHECK": "true"
-  }
+  ]
 }
