@@ -100,7 +100,7 @@ cat > vercel.json << 'EOL'
 {
   "version": 2,
   "buildCommand": "cd client && npm install && node vercel-build.js",
-  "installCommand": "npm install && ./fix-puppeteer.sh",
+  "installCommand": "npm install && ./fix-puppeteer.sh && ./fix-tailwind.sh",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "routes": [

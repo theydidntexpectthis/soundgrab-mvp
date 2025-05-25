@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "cd client && npm install && npx vite build --mode production",
-  "installCommand": "npm install && ./fix-puppeteer.sh",
+  "installCommand": "npm install && ./fix-puppeteer.sh && ./fix-tailwind.sh",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "routes": [
