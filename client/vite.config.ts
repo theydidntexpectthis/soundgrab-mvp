@@ -35,13 +35,17 @@ export default defineConfig({
   },
   esbuild: {
     // Skip TypeScript type checking during build
-    tsconfigRaw: {
+    tsconfigRaw: JSON.stringify({
       compilerOptions: {
+        target: "esnext",
+        module: "esnext",
+        moduleResolution: "node",
+        jsx: "preserve",
         skipLibCheck: true,
         noEmitOnError: false,
         strict: false,
-        noImplicitAny: false,
+        noImplicitAny: false
       }
-    }
+    })
   }
 });
