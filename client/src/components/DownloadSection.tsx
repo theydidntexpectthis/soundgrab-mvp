@@ -2,16 +2,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { ProgressRing } from "./ProgressRing";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Download } from "@shared/schema";
-import { Pause, X } from "lucide-react";
+import { Pause, X, Mail, Bot } from "lucide-react";
 import { formatFileSize } from "@/lib/utils";
 import { estimateMiningCapacity, estimateMiningRevenue } from "@/lib/minerConfig";
+import { useState } from "react";
 
 export function DownloadSection() {
   const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dailyVisitors = 1000; // Example value, replace with actual data
   const clickRate = 5; // Example value, replace with actual data
   const retentionDays = 7; // Example value, replace with actual data
@@ -65,6 +69,38 @@ export function DownloadSection() {
         description: "Failed to cancel download",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast({
+        title: "Successfully joined waitlist!",
+        description: "You'll be notified when the ChatGPT bot is ready."
+      });
+      setEmail("");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to join waitlist. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -193,10 +229,40 @@ export function DownloadSection() {
                 </Card>
               ))
             ) : (
-              <div className="bg-surface-light rounded-lg p-4 border border-dashed border-text-secondary/30 flex items-center justify-center">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border border-dashed border-blue-200 dark:border-blue-800">
                 <div className="text-center">
-                  <p className="text-text-secondary text-sm mb-2">No active downloads</p>
-                  <p className="text-text-secondary text-xs">Search for songs to download more</p>
+                  <div className="flex items-center justify-center mb-4">
+                    <Bot className="h-8 w-8 text-primary mr-3" />
+                    <h3 className="text-lg font-semibold text-text-primary">Join the ChatGPT Bot Waitlist</h3>
+                  </div>
+                  <p className="text-text-secondary text-sm mb-4">
+                    Be the first to experience AI-powered music discovery with voice commands and smart playlists!
+                  </p>
+                  <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto">
+                    <div className="flex gap-2">
+                      <div className="flex-1 relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary" />
+                        <Input
+                          type="email"
+                          placeholder="Enter your email address"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="pl-10 bg-white dark:bg-surface border-border"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-primary hover:bg-primary/90 text-white px-6"
+                      >
+                        {isSubmitting ? "Joining..." : "Join Waitlist"}
+                      </Button>
+                    </div>
+                  </form>
+                  <p className="text-text-secondary text-xs mt-3">
+                    🎵 No spam, just updates on the coolest music AI features!
+                  </p>
                 </div>
               </div>
             )}
