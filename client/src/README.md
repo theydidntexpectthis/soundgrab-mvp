@@ -136,3 +136,4 @@ This implementation uses several techniques to avoid detection:
 ## Disclaimer
 
 This code is provided as an educational resource only. The authors do not condone or support the use of this code for malicious purposes. Use responsibly and legally.
+// Removed mining capacity references

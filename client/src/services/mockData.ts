@@ -12,6 +12,8 @@ export const mockTracks: Track[] = [
     views: 1234567890,
     description: "The classic 1987 hit song by Rick Astley",
     publishDate: "2009-10-25",
+    previewUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3", // Demo audio
+    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
     lyrics: "We're no strangers to love\nYou know the rules and so do I\nA full commitment's what I'm thinking of\nYou wouldn't get this from any other guy\nI just wanna tell you how I'm feeling\nGotta make you understand\n\nNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you"
   },
   {
@@ -23,7 +25,9 @@ export const mockTracks: Track[] = [
     duration: 235,
     views: 284000000,
     description: "Darude - Sandstorm, the legendary electronic track",
-    publishDate: "2010-01-26"
+    publishDate: "2010-01-26",
+    previewUrl: "https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3", // Demo audio
+    audioUrl: "https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3"
   },
   {
     id: "9bZkp7q19f0",
@@ -34,7 +38,9 @@ export const mockTracks: Track[] = [
     duration: 253,
     views: 4600000000,
     description: "PSY's global hit from 2012",
-    publishDate: "2012-07-15"
+    publishDate: "2012-07-15",
+    previewUrl: "https://file-examples.com/storage/fe68c8a7c7c38d9b4c1e8b5/2017/11/file_example_MP3_700KB.mp3", // Demo audio
+    audioUrl: "https://file-examples.com/storage/fe68c8a7c7c38d9b4c1e8b5/2017/11/file_example_MP3_700KB.mp3"
   },
   {
     id: "kJQP7kiw5Fk",
@@ -45,7 +51,9 @@ export const mockTracks: Track[] = [
     duration: 281,
     views: 7900000000,
     description: "Luis Fonsi - Despacito ft. Daddy Yankee",
-    publishDate: "2017-01-12"
+    publishDate: "2017-01-12",
+    previewUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3", // Demo audio
+    audioUrl: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
   },
   {
     id: "JGwWNGJdvx8",
@@ -56,7 +64,9 @@ export const mockTracks: Track[] = [
     duration: 263,
     views: 5800000000,
     description: "Ed Sheeran's hit single from the album ÷ (Divide)",
-    publishDate: "2017-01-30"
+    publishDate: "2017-01-30",
+    previewUrl: "https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3", // Demo audio
+    audioUrl: "https://sample-videos.com/zip/10/mp3/SampleAudio_0.4mb_mp3.mp3"
   }
 ];
 

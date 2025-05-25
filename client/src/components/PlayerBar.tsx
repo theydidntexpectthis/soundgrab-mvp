@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { 
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, 
-  Download, List 
+import {
+  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
+  Download, List
 } from "lucide-react";
 import { usePlayback } from "./Layout";
 import { formatTime } from "@/lib/utils";
@@ -17,57 +17,85 @@ export function PlayerBar() {
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const { toast } = useToast();
-  
+
   // Audio element reference
   const [audio] = useState(new Audio());
-  
+
   useEffect(() => {
     // Set up audio element
-    if (currentTrack?.previewUrl) {
-      audio.src = currentTrack.previewUrl;
+    if (currentTrack) {
+      // Use previewUrl, audioUrl, or fallback to a demo audio
+      const audioSrc = currentTrack.previewUrl ||
+                      currentTrack.audioUrl ||
+                      `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.wav`;
+
+      audio.src = audioSrc;
       audio.volume = volume;
       audio.muted = isMuted;
-      
+      audio.crossOrigin = "anonymous"; // Enable CORS for external audio
+
+      console.log("Setting up audio for:", currentTrack.title, "with URL:", audioSrc);
+
       if (isPlaying) {
-        audio.play().catch(error => {
-          console.error("Failed to play audio:", error);
-          toast({
-            title: "Playback Error",
-            description: "Could not play this track. Try another one.",
-            variant: "destructive"
+        // Add a small delay to ensure audio is loaded
+        setTimeout(() => {
+          audio.play().catch(error => {
+            console.error("Failed to play audio:", error);
+            toast({
+              title: "Playback Error",
+              description: "Could not play this track. Using demo audio instead.",
+              variant: "destructive"
+            });
+
+            // Fallback to a working demo audio
+            audio.src = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
+            audio.play().catch(err => console.error("Demo audio also failed:", err));
           });
-        });
+        }, 100);
       } else {
         audio.pause();
       }
-      
+
       // Set up event listeners
       const handleTimeUpdate = () => {
         setCurrentTime(audio.currentTime);
       };
-      
+
       const handleLoadedMetadata = () => {
         setDuration(audio.duration);
+        console.log("Audio loaded, duration:", audio.duration);
       };
-      
+
       const handleEnded = () => {
+        console.log("Audio ended, skipping to next");
         skipNext();
       };
-      
+
+      const handleError = (e: Event) => {
+        console.error("Audio error:", e);
+        toast({
+          title: "Audio Error",
+          description: "There was a problem loading the audio file.",
+          variant: "destructive"
+        });
+      };
+
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('ended', handleEnded);
-      
+      audio.addEventListener('error', handleError);
+
       // Clean up
       return () => {
         audio.pause();
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
       };
     }
   }, [currentTrack, isPlaying, volume, isMuted, audio, skipNext, toast]);
-  
+
   const handleSeek = (value: number[]) => {
     if (audio) {
       const newTime = value[0];
@@ -75,13 +103,13 @@ export function PlayerBar() {
       setCurrentTime(newTime);
     }
   };
-  
+
   const handleVolumeChange = (value: number[]) => {
     const newVolume = value[0];
     setVolume(newVolume);
     if (audio) {
       audio.volume = newVolume;
-      
+
       if (newVolume === 0) {
         setIsMuted(true);
         audio.muted = true;
@@ -91,30 +119,30 @@ export function PlayerBar() {
       }
     }
   };
-  
+
   const toggleMute = () => {
     setIsMuted(!isMuted);
     if (audio) {
       audio.muted = !isMuted;
     }
   };
-  
+
   const handleDownload = async () => {
     if (!currentTrack) return;
-    
+
     try {
       toast({
         title: "Starting download",
         description: `Preparing ${currentTrack.title} for download...`
       });
-      
+
       const response = await apiRequest("POST", "/api/downloads", {
         videoId: currentTrack.videoId,
         format: "mp3",
         title: currentTrack.title,
         artist: currentTrack.artist
       });
-      
+
       if (response.ok) {
         toast({
           title: "Download started",
@@ -132,9 +160,9 @@ export function PlayerBar() {
       });
     }
   };
-  
+
   if (!currentTrack) return null;
-  
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-light p-3 z-20">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -145,11 +173,11 @@ export function PlayerBar() {
               {Array(8).fill(0).map((_, i) => {
                 const height = isPlaying ? 30 + Math.random() * 40 : 20;
                 return (
-                  <rect 
-                    key={i} 
-                    x={i * 12 + 4} 
+                  <rect
+                    key={i}
+                    x={i * 12 + 4}
                     y={(100 - height) / 2}
-                    width="8" 
+                    width="8"
                     height={height}
                     rx="2"
                     fill="hsl(var(--primary))"
@@ -164,7 +192,7 @@ export function PlayerBar() {
             <p className="text-text-secondary text-xs truncate">{currentTrack.artist}</p>
           </div>
         </div>
-        
+
         <div className="flex-1 max-w-md">
           <div className="flex items-center justify-center space-x-4">
             <Button
@@ -203,7 +231,7 @@ export function PlayerBar() {
             <span className="text-text-secondary text-xs ml-2">{formatTime(duration)}</span>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-end w-1/4 space-x-3">
           <Button
             variant="ghost"

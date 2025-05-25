@@ -1,5 +1,4 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
@@ -8,12 +7,9 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users, {
+export const insertUserSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
-}).pick({
-  username: true,
-  password: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -54,12 +50,16 @@ export interface SearchHistory {
 export interface Download {
   id: string;
   track: Track;
+  title: string; // Track title for easy access
+  artist: string; // Track artist for easy access
   progress: number; // 0-100
   status: 'queued' | 'downloading' | 'processing' | 'completed' | 'error';
   error?: string;
   startTime: Date;
   completedTime?: Date;
   fileSize?: number; // in bytes
+  downloadedBytes?: number; // bytes downloaded so far
+  totalBytes?: number; // total bytes to download
   filePath?: string;
   fileName?: string;
 }
