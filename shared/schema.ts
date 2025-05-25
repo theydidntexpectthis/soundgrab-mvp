@@ -29,6 +29,7 @@ export interface Track {
   publishDate?: string;
   lyrics?: string;
   audioUrl?: string;
+  previewUrl?: string; // URL for audio preview/streaming
 }
 
 // Search results interface
@@ -44,4 +45,18 @@ export interface SearchHistory {
   timestamp: Date;
   results: Track[];
   track?: Track; // Optional track directly associated with this search
+}
+
+// Download interface for tracking active and completed downloads
+export interface Download {
+  id: string;
+  track: Track;
+  progress: number; // 0-100
+  status: 'queued' | 'downloading' | 'processing' | 'completed' | 'error';
+  error?: string;
+  startTime: Date;
+  completedTime?: Date;
+  fileSize?: number; // in bytes
+  filePath?: string;
+  fileName?: string;
 }

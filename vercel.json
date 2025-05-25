@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "node deploy-fix.js",
+  "buildCommand": "cd client && npm install && node vercel-build.js",
   "outputDirectory": "client/dist",
   "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
