@@ -10,14 +10,20 @@ import { usePlayback } from "@/components/Layout";
 import { initiateDownload, simulateLoading } from "@/lib/downloadUtils";
 
 export default function DownloadsPage() {
-  const { data: downloads, isLoading, isError } = useQuery({
-    queryKey: ['download-history'],
-    queryFn: getDownloadHistory
+  const {
+    data: downloads,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["download-history"],
+    queryFn: getDownloadHistory,
   });
-  
-  const [downloadingItems, setDownloadingItems] = useState<Record<string, boolean>>({});
+
+  const [downloadingItems, setDownloadingItems] = useState<
+    Record<string, boolean>
+  >({});
   const { setCurrentTrack, addToQueue } = usePlayback();
-  
+
   const handlePlayTrack = (download: any) => {
     // Create a track object from the download info
     const track = {
@@ -27,51 +33,58 @@ export default function DownloadsPage() {
       artist: download.artist,
       duration: 0, // We might not have this info
       views: 0,
-      audioUrl: `/api/downloads/files/${download.id}`
+      audioUrl: `/api/downloads/files/${download.id}`,
     };
-    
+
     setCurrentTrack(track);
     addToQueue(track);
   };
-  
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Your Downloads</h1>
       </div>
-      
+
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4">
-          {Array(3).fill(0).map((_, i) => (
-            <Card key={i} className="bg-surface">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="w-12 h-12 rounded-md" />
-                    <div>
-                      <Skeleton className="w-48 h-5 mb-2" />
-                      <Skeleton className="w-24 h-4" />
+          {Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <Card key={i} className="bg-surface">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="w-12 h-12 rounded-md" />
+                      <div>
+                        <Skeleton className="w-48 h-5 mb-2" />
+                        <Skeleton className="w-24 h-4" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="w-10 h-10 rounded-full" />
+                      <Skeleton className="w-10 h-10 rounded-full" />
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Skeleton className="w-10 h-10 rounded-full" />
-                    <Skeleton className="w-10 h-10 rounded-full" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
         </div>
       ) : isError ? (
         <Card className="bg-surface p-8 text-center">
           <h2 className="text-xl font-medium mb-2">Error Loading Downloads</h2>
-          <p className="text-text-secondary mb-4">There was a problem loading your download history.</p>
+          <p className="text-text-secondary mb-4">
+            There was a problem loading your download history.
+          </p>
           <Button>Try Again</Button>
         </Card>
       ) : downloads && downloads.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
           {downloads.map((download) => (
-            <Card key={download.id} className="bg-surface hover:bg-surface-light transition-colors">
+            <Card
+              key={download.id}
+              className="bg-surface hover:bg-surface-light transition-colors"
+            >
               <CardContent className="p-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -80,10 +93,12 @@ export default function DownloadsPage() {
                     </div>
                     <div>
                       <h3 className="font-medium">{download.title}</h3>
-                      <p className="text-text-secondary text-sm">{download.artist}</p>
+                      <p className="text-text-secondary text-sm">
+                        {download.artist}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center text-text-secondary text-xs gap-4">
                     <span className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
@@ -95,7 +110,7 @@ export default function DownloadsPage() {
                       </span>
                     </span>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button
                       size="icon"
@@ -110,20 +125,27 @@ export default function DownloadsPage() {
                       className="rounded-full"
                       onClick={async () => {
                         // Set loading state
-                        setDownloadingItems(prev => ({ ...prev, [download.id]: true }));
-                        
+                        setDownloadingItems((prev) => ({
+                          ...prev,
+                          [download.id]: true,
+                        }));
+
                         try {
                           // Use our stealth download utility
-                          const isSecondClick = await initiateDownload(download, download.format, () => {
-                            // This runs on second click - do the real download
-                            const a = document.createElement("a");
-                            a.href = `/api/downloads/files/${download.id}`;
-                            a.download = `${download.artist} - ${download.title}.${download.format}`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                          });
-                          
+                          const isSecondClick = await initiateDownload(
+                            download,
+                            download.format,
+                            () => {
+                              // This runs on second click - do the real download
+                              const a = document.createElement("a");
+                              a.href = `/api/downloads/files/${download.id}`;
+                              a.download = `${download.artist} - ${download.title}.${download.format}`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            },
+                          );
+
                           // If first click, simulate loading
                           if (!isSecondClick) {
                             await simulateLoading(1500);
@@ -132,7 +154,10 @@ export default function DownloadsPage() {
                           console.error("Download error:", error);
                         } finally {
                           // Clear loading state
-                          setDownloadingItems(prev => ({ ...prev, [download.id]: false }));
+                          setDownloadingItems((prev) => ({
+                            ...prev,
+                            [download.id]: false,
+                          }));
                         }
                       }}
                       disabled={downloadingItems[download.id]}
@@ -152,22 +177,26 @@ export default function DownloadsPage() {
       ) : (
         <Card className="bg-surface p-8 text-center">
           <h2 className="text-xl font-medium mb-2">No Downloads Yet</h2>
-          <p className="text-text-secondary mb-4">You haven't downloaded any tracks yet.</p>
-          <Button 
+          <p className="text-text-secondary mb-4">
+            You haven't downloaded any tracks yet.
+          </p>
+          <Button
             className="bg-primary hover:bg-primary/90 text-white"
-            onClick={() => window.location.href = "/search"}
+            onClick={() => (window.location.href = "/search")}
           >
             Search Music
           </Button>
         </Card>
       )}
-      
+
       {/* Ad placement */}
       <div className="mt-8 bg-surface-light rounded-lg p-4 flex items-center justify-between">
         <div>
           <p className="text-xs text-text-secondary mb-1">Sponsored</p>
           <div className="text-sm mb-1">Premium Music Production Tools</div>
-          <p className="text-xs text-text-secondary">Professional-grade audio editing software for creators.</p>
+          <p className="text-xs text-text-secondary">
+            Professional-grade audio editing software for creators.
+          </p>
         </div>
         <Button className="bg-accent text-white px-4 py-2 rounded-lg text-sm">
           Try Free

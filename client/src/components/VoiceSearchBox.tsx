@@ -49,33 +49,45 @@ interface VoiceSearchBoxProps {
   isSearching?: boolean;
 }
 
-export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBoxProps) {
+export function VoiceSearchBox({
+  onSearch,
+  isSearching = false,
+}: VoiceSearchBoxProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
-  
+  const [speechRecognition, setSpeechRecognition] =
+    useState<SpeechRecognition | null>(null);
+
   // Check if browser supports SpeechRecognition
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognitionConstructor() as SpeechRecognition;
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognitionConstructor =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+      const recognition =
+        new SpeechRecognitionConstructor() as SpeechRecognition;
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'en-US';
-      
+      recognition.lang = "en-US";
+
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const interimTranscript = Array.from(Array.from({length: event.results.length}, (_, i) => event.results[i]))
-          .map(result => result[0].transcript)
-          .join('');
+        const interimTranscript = Array.from(
+          Array.from(
+            { length: event.results.length },
+            (_, i) => event.results[i],
+          ),
+        )
+          .map((result) => result[0].transcript)
+          .join("");
         setTranscript(interimTranscript);
       };
-      
+
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setErrorMessage(`Error occurred in recognition: ${event.error}`);
         setIsListening(false);
       };
-      
+
       recognition.onend = () => {
         setIsListening(false);
         if (transcript.trim()) {
@@ -85,22 +97,24 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
           }, 1000);
         }
       };
-      
+
       setSpeechRecognition(recognition);
     } else {
-      setErrorMessage("Your browser doesn't support speech recognition. Try using a browser like Chrome.");
+      setErrorMessage(
+        "Your browser doesn't support speech recognition. Try using a browser like Chrome.",
+      );
     }
-    
+
     return () => {
       if (speechRecognition) {
         speechRecognition.abort();
       }
     };
   }, []);
-  
+
   const toggleListening = () => {
     if (!speechRecognition) return;
-    
+
     if (isListening) {
       speechRecognition.stop();
       setIsListening(false);
@@ -111,14 +125,14 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
       setIsListening(true);
     }
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (transcript.trim()) {
       onSearch(transcript);
     }
   };
-  
+
   return (
     <Card className="bg-surface shadow-md">
       <CardContent className="pt-6">
@@ -128,11 +142,11 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
               <Mic size={18} className="text-primary" />
               <h3 className="text-lg font-medium">Voice Search</h3>
             </div>
-            
+
             <p className="text-text-secondary text-sm mb-2">
               Speak the name of a song, artist, or lyrics to find music
             </p>
-            
+
             <div className="relative min-h-[120px] bg-surface-light rounded-md p-4 flex flex-col items-center justify-center">
               {isListening ? (
                 <div className="flex flex-col items-center">
@@ -157,16 +171,16 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
                         "{transcript}"
                       </p>
                       <div className="flex justify-center gap-2 mt-4">
-                        <Button 
-                          type="button" 
-                          variant="outline" 
+                        <Button
+                          type="button"
+                          variant="outline"
                           onClick={() => setTranscript("")}
                           size="sm"
                         >
                           Clear
                         </Button>
-                        <Button 
-                          type="submit" 
+                        <Button
+                          type="submit"
                           className="bg-primary hover:bg-primary/90"
                           size="sm"
                           disabled={isSearching}
@@ -187,19 +201,19 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
                 </div>
               )}
             </div>
-            
+
             {errorMessage && (
               <div className="text-destructive text-sm p-2 bg-destructive/10 rounded-md">
                 {errorMessage}
               </div>
             )}
-            
-            <Button 
-              type="button" 
+
+            <Button
+              type="button"
               onClick={toggleListening}
               className={`mt-2 flex items-center gap-2 ${
-                isListening 
-                  ? "bg-destructive hover:bg-destructive/90" 
+                isListening
+                  ? "bg-destructive hover:bg-destructive/90"
                   : "bg-primary hover:bg-primary/90"
               }`}
               disabled={!speechRecognition || isSearching}
@@ -216,12 +230,15 @@ export function VoiceSearchBox({ onSearch, isSearching = false }: VoiceSearchBox
                 </>
               )}
             </Button>
-            
+
             <div className="mt-2 text-xs text-text-secondary">
               <p>Tips:</p>
               <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Speak clearly and at a normal pace</li>
-                <li>Try phrases like "Play songs by Ed Sheeran" or "Find Shape of You"</li>
+                <li>
+                  Try phrases like "Play songs by Ed Sheeran" or "Find Shape of
+                  You"
+                </li>
                 <li>You can also try reciting some lyrics you remember</li>
               </ul>
             </div>

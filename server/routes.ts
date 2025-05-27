@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import ytdl from 'ytdl-core';
 import axios from 'axios';
 import { getLyrics, getSong } from 'genius-lyrics-api';
-import { SearchResult, Track } from '@shared/schema';
+import { SearchResult, Track } from '../shared/schema';
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -110,6 +110,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting download history:', error);
       return res.status(500).json({ error: 'Failed to retrieve download history' });
+    }
+  });
+
+  // Get active downloads
+  app.get('/api/downloads/active', async (req: Request, res: Response) => {
+    try {
+      // For now, return empty array since we don't have real-time download tracking
+      // In a real implementation, this would return currently downloading files
+      return res.json([]);
+    } catch (error) {
+      console.error('Error getting active downloads:', error);
+      return res.status(500).json({ error: 'Failed to retrieve active downloads' });
+    }
+  });
+
+  // Pause download endpoint
+  app.patch('/api/downloads/:id/pause', async (req: Request, res: Response) => {
+    try {
+      const downloadId = req.params.id;
+      // In a real implementation, this would pause the download
+      console.log(`Pausing download: ${downloadId}`);
+      return res.json({ success: true, message: 'Download paused' });
+    } catch (error) {
+      console.error('Error pausing download:', error);
+      return res.status(500).json({ error: 'Failed to pause download' });
+    }
+  });
+
+  // Cancel download endpoint
+  app.delete('/api/downloads/:id', async (req: Request, res: Response) => {
+    try {
+      const downloadId = req.params.id;
+      // In a real implementation, this would cancel and remove the download
+      console.log(`Cancelling download: ${downloadId}`);
+      return res.json({ success: true, message: 'Download cancelled' });
+    } catch (error) {
+      console.error('Error cancelling download:', error);
+      return res.status(500).json({ error: 'Failed to cancel download' });
     }
   });
 

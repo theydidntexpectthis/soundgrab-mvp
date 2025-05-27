@@ -1,4 +1,4 @@
-declare module 'genius-lyrics-api' {
+declare module "genius-lyrics-api" {
   interface GeniusOptions {
     apiKey: string;
     title: string;
@@ -16,5 +16,7 @@ declare module 'genius-lyrics-api' {
 
   export function getLyrics(options: GeniusOptions): Promise<string | null>;
   export function getSong(options: GeniusOptions): Promise<GeniusSong | null>;
-  export function searchSong(options: GeniusOptions): Promise<GeniusSong | null>;
+  export function searchSong(
+    options: GeniusOptions,
+  ): Promise<GeniusSong | null>;
 }

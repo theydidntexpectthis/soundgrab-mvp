@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
 type Theme = "dark" | "light";
 
@@ -21,10 +27,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     // Always add dark class - our app is a dark theme app by default
     root.classList.add("dark");
-    
+
     localStorage.setItem("theme", theme);
   }, [theme]);
 

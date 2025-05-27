@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import {
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX,
-  Download, List
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+  Download,
+  List,
 } from "lucide-react";
 import { usePlayback } from "./Layout";
 import { formatTime } from "@/lib/utils";
@@ -11,7 +17,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export function PlayerBar() {
-  const { currentTrack, isPlaying, togglePlayback, skipNext, skipPrevious } = usePlayback();
+  const { currentTrack, isPlaying, togglePlayback, skipNext, skipPrevious } =
+    usePlayback();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
@@ -25,31 +32,41 @@ export function PlayerBar() {
     // Set up audio element
     if (currentTrack) {
       // Use previewUrl, audioUrl, or fallback to a demo audio
-      const audioSrc = currentTrack.previewUrl ||
-                      currentTrack.audioUrl ||
-                      `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.wav`;
+      const audioSrc =
+        currentTrack.previewUrl ||
+        currentTrack.audioUrl ||
+        `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.wav`;
 
       audio.src = audioSrc;
       audio.volume = volume;
       audio.muted = isMuted;
       audio.crossOrigin = "anonymous"; // Enable CORS for external audio
 
-      console.log("Setting up audio for:", currentTrack.title, "with URL:", audioSrc);
+      console.log(
+        "Setting up audio for:",
+        currentTrack.title,
+        "with URL:",
+        audioSrc,
+      );
 
       if (isPlaying) {
         // Add a small delay to ensure audio is loaded
         setTimeout(() => {
-          audio.play().catch(error => {
+          audio.play().catch((error) => {
             console.error("Failed to play audio:", error);
             toast({
               title: "Playback Error",
-              description: "Could not play this track. Using demo audio instead.",
-              variant: "destructive"
+              description:
+                "Could not play this track. Using demo audio instead.",
+              variant: "destructive",
             });
 
             // Fallback to a working demo audio
-            audio.src = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
-            audio.play().catch(err => console.error("Demo audio also failed:", err));
+            audio.src =
+              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
+            audio
+              .play()
+              .catch((err) => console.error("Demo audio also failed:", err));
           });
         }, 100);
       } else {
@@ -76,22 +93,22 @@ export function PlayerBar() {
         toast({
           title: "Audio Error",
           description: "There was a problem loading the audio file.",
-          variant: "destructive"
+          variant: "destructive",
         });
       };
 
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.addEventListener('ended', handleEnded);
-      audio.addEventListener('error', handleError);
+      audio.addEventListener("timeupdate", handleTimeUpdate);
+      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.addEventListener("ended", handleEnded);
+      audio.addEventListener("error", handleError);
 
       // Clean up
       return () => {
         audio.pause();
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        audio.removeEventListener('ended', handleEnded);
-        audio.removeEventListener('error', handleError);
+        audio.removeEventListener("timeupdate", handleTimeUpdate);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("error", handleError);
       };
     }
   }, [currentTrack, isPlaying, volume, isMuted, audio, skipNext, toast]);
@@ -133,20 +150,20 @@ export function PlayerBar() {
     try {
       toast({
         title: "Starting download",
-        description: `Preparing ${currentTrack.title} for download...`
+        description: `Preparing ${currentTrack.title} for download...`,
       });
 
       const response = await apiRequest("POST", "/api/downloads", {
         videoId: currentTrack.videoId,
         format: "mp3",
         title: currentTrack.title,
-        artist: currentTrack.artist
+        artist: currentTrack.artist,
       });
 
       if (response.ok) {
         toast({
           title: "Download started",
-          description: `${currentTrack.title} will be downloaded shortly`
+          description: `${currentTrack.title} will be downloaded shortly`,
         });
       } else {
         throw new Error("Download failed");
@@ -156,7 +173,7 @@ export function PlayerBar() {
       toast({
         title: "Download failed",
         description: "There was an error preparing your download",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -170,26 +187,32 @@ export function PlayerBar() {
           <div className="w-12 h-12 rounded-md mr-3 bg-surface-light flex items-center justify-center overflow-hidden">
             {/* Audio visualization SVG */}
             <svg viewBox="0 0 100 100" className="w-full h-full">
-              {Array(8).fill(0).map((_, i) => {
-                const height = isPlaying ? 30 + Math.random() * 40 : 20;
-                return (
-                  <rect
-                    key={i}
-                    x={i * 12 + 4}
-                    y={(100 - height) / 2}
-                    width="8"
-                    height={height}
-                    rx="2"
-                    fill="hsl(var(--primary))"
-                    opacity={0.7 + Math.random() * 0.3}
-                  />
-                );
-              })}
+              {Array(8)
+                .fill(0)
+                .map((_, i) => {
+                  const height = isPlaying ? 30 + Math.random() * 40 : 20;
+                  return (
+                    <rect
+                      key={i}
+                      x={i * 12 + 4}
+                      y={(100 - height) / 2}
+                      width="8"
+                      height={height}
+                      rx="2"
+                      fill="hsl(var(--primary))"
+                      opacity={0.7 + Math.random() * 0.3}
+                    />
+                  );
+                })}
             </svg>
           </div>
           <div className="truncate">
-            <h4 className="font-medium text-sm truncate">{currentTrack.title}</h4>
-            <p className="text-text-secondary text-xs truncate">{currentTrack.artist}</p>
+            <h4 className="font-medium text-sm truncate">
+              {currentTrack.title}
+            </h4>
+            <p className="text-text-secondary text-xs truncate">
+              {currentTrack.artist}
+            </p>
           </div>
         </div>
 
@@ -207,7 +230,11 @@ export function PlayerBar() {
               className="bg-primary hover:bg-primary/90 text-white p-2 rounded-full transition-all h-10 w-10"
               onClick={togglePlayback}
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -219,7 +246,9 @@ export function PlayerBar() {
             </Button>
           </div>
           <div className="flex items-center mt-1">
-            <span className="text-text-secondary text-xs mr-2">{formatTime(currentTime)}</span>
+            <span className="text-text-secondary text-xs mr-2">
+              {formatTime(currentTime)}
+            </span>
             <Slider
               value={[currentTime]}
               min={0}
@@ -228,7 +257,9 @@ export function PlayerBar() {
               onValueChange={handleSeek}
               className="flex-1 h-1"
             />
-            <span className="text-text-secondary text-xs ml-2">{formatTime(duration)}</span>
+            <span className="text-text-secondary text-xs ml-2">
+              {formatTime(duration)}
+            </span>
           </div>
         </div>
 
@@ -239,7 +270,11 @@ export function PlayerBar() {
             className="text-text-secondary hover:text-text-primary transition-colors"
             onClick={toggleMute}
           >
-            {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            {isMuted ? (
+              <VolumeX className="h-5 w-5" />
+            ) : (
+              <Volume2 className="h-5 w-5" />
+            )}
           </Button>
           <Slider
             value={[isMuted ? 0 : volume]}

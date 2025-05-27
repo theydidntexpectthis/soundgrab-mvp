@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, SearchResult, Track } from "@shared/schema";
+import { type User, type InsertUser, SearchResult, Track } from "../shared/schema";
 
 // Interface for download records
 export interface Download {

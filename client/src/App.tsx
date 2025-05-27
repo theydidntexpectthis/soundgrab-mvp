@@ -11,6 +11,7 @@ import DownloadsPage from "@/pages/downloads";
 import SettingsPage from "@/pages/settings";
 import LyricsSearchPage from "@/pages/lyrics-search";
 import VoiceSearchPage from "@/pages/voice-search";
+import SignupPage from "@/pages/SignupPage"; // Added import for SignupPage
 import { Layout } from "@/components/Layout";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/recent" component={RecentPage} />
         <Route path="/downloads" component={DownloadsPage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/signup" component={SignupPage} /> {/* Added route for SignupPage */}
         {/* Fallback to 404 */}
         <Route component={NotFound} />
       </Switch>

@@ -1,19 +1,14 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { z } from "zod";
+// User types for future database integration
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+}
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
-export const insertUserSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export interface InsertUser {
+  username: string;
+  password: string;
+}
 
 // Track interface for audio tracks
 export interface Track {

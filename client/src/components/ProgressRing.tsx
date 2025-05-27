@@ -23,7 +23,7 @@ export function ProgressRing({
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (progress / 100) * circumference;
-  
+
   return (
     <div className={cn("relative", className)}>
       <svg className="progress-ring" width={size} height={size}>
@@ -44,7 +44,10 @@ export function ProgressRing({
           r={radius}
           cx={size / 2}
           cy={size / 2}
-          style={{ strokeDasharray: `${circumference} ${circumference}`, strokeDashoffset: offset }}
+          style={{
+            strokeDasharray: `${circumference} ${circumference}`,
+            strokeDashoffset: offset,
+          }}
         />
       </svg>
       {showPercentage && (

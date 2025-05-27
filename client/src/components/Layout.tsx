@@ -22,7 +22,9 @@ export interface PlaybackContext {
 // Create a context for global playback state
 import { createContext, useContext } from "react";
 
-export const PlaybackContext = createContext<PlaybackContext | undefined>(undefined);
+export const PlaybackContext = createContext<PlaybackContext | undefined>(
+  undefined,
+);
 
 export function usePlayback() {
   const context = useContext(PlaybackContext);
@@ -40,20 +42,20 @@ export function Layout({ children }: LayoutProps) {
 
   // Playback control functions
   const togglePlayback = () => {
-    setIsPlaying(prev => !prev);
+    setIsPlaying((prev) => !prev);
   };
 
   const addToQueue = (track: Track) => {
-    setQueue(prev => [...prev, track]);
+    setQueue((prev) => [...prev, track]);
   };
 
   const removeFromQueue = (trackId: string) => {
-    setQueue(prev => prev.filter(t => t.id !== trackId));
+    setQueue((prev) => prev.filter((t) => t.id !== trackId));
   };
 
   const skipNext = () => {
     if (queue.length > 0 && currentTrack) {
-      const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
+      const currentIndex = queue.findIndex((t) => t.id === currentTrack.id);
       if (currentIndex < queue.length - 1) {
         setCurrentTrack(queue[currentIndex + 1]);
       } else if (queue.length > 0) {
@@ -65,7 +67,7 @@ export function Layout({ children }: LayoutProps) {
 
   const skipPrevious = () => {
     if (queue.length > 0 && currentTrack) {
-      const currentIndex = queue.findIndex(t => t.id === currentTrack.id);
+      const currentIndex = queue.findIndex((t) => t.id === currentTrack.id);
       if (currentIndex > 0) {
         setCurrentTrack(queue[currentIndex - 1]);
       } else if (queue.length > 0) {
@@ -84,24 +86,20 @@ export function Layout({ children }: LayoutProps) {
     addToQueue,
     removeFromQueue,
     skipNext,
-    skipPrevious
+    skipPrevious,
   };
 
   return (
     <PlaybackContext.Provider value={playbackValue}>
       <div className="flex flex-col md:flex-row min-h-screen">
-        <Sidebar 
-          isOpen={isMobileSidebarOpen} 
+        <Sidebar
+          isOpen={isMobileSidebarOpen}
           onToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
-        
-        <main className="flex-1 md:ml-64 p-4">
-          {children}
-        </main>
-        
-        {currentTrack && (
-          <PlayerBar />
-        )}
+
+        <main className="flex-1 md:ml-64 p-4">{children}</main>
+
+        {currentTrack && <PlayerBar />}
       </div>
     </PlaybackContext.Provider>
   );

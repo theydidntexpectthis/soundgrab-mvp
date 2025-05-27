@@ -7,15 +7,15 @@ import { initializeApp, checkBrowserCompatibility } from "./lib/appInit";
 const compatibility = checkBrowserCompatibility();
 if (compatibility.compatible) {
   console.log("Browser compatibility check passed");
-  
+
   // Initialize application services
   initializeApp();
-  
+
   // Render the application
   createRoot(document.getElementById("root")!).render(<App />);
 } else {
   console.error("Browser compatibility check failed:", compatibility);
-  
+
   // Display error message for incompatible browsers
   const rootElement = document.getElementById("root");
   if (rootElement) {

@@ -22,20 +22,20 @@
   --destructive: 0 62.8% 30.6%; /* #7F1D1D */
   --destructive-foreground: 0 0% 98%; /* #FAFAFA */
   --ring: 240 4.9% 83.9%; /* #D4D4D8 */
-  
+
   /* Custom theme colors */
   --surface: 240 5% 12%; /* #1E1E1E */
   --surface-light: 240 5% 16%; /* #282828 */
   --text-primary: 0 0% 100%; /* #FFFFFF */
   --text-secondary: 0 0% 70%; /* #B3B3B3 */
-  
+
   /* Chart colors */
   --chart-1: 142 70% 48%; /* #1DB954 */
   --chart-2: 0 100% 50%; /* #FF0000 */
   --chart-3: 225 99% 62%; /* #3D5AFE */
   --chart-4: 39 100% 50%; /* #FFA500 */
   --chart-5: 262 83% 58%; /* #8A2BE2 */
-  
+
   --radius: 0.5rem;
 }
 
@@ -59,7 +59,7 @@
   --destructive: 0 62.8% 30.6%; /* #7F1D1D */
   --destructive-foreground: 0 0% 98%; /* #FAFAFA */
   --ring: 240 4.9% 83.9%; /* #D4D4D8 */
-  
+
   /* Custom theme colors */
   --surface: 240 5% 12%; /* #1E1E1E */
   --surface-light: 240 5% 16%; /* #282828 */
@@ -75,8 +75,13 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-bold;
   }
 }
@@ -101,7 +106,8 @@
 }
 
 @keyframes wave {
-  0%, 100% {
+  0%,
+  100% {
     height: 20%;
   }
   50% {
@@ -109,16 +115,36 @@
   }
 }
 
-.wave-bar:nth-child(1) { animation-delay: 0.0s; }
-.wave-bar:nth-child(2) { animation-delay: 0.1s; }
-.wave-bar:nth-child(3) { animation-delay: 0.2s; }
-.wave-bar:nth-child(4) { animation-delay: 0.3s; }
-.wave-bar:nth-child(5) { animation-delay: 0.4s; }
-.wave-bar:nth-child(6) { animation-delay: 0.5s; }
-.wave-bar:nth-child(7) { animation-delay: 0.6s; }
-.wave-bar:nth-child(8) { animation-delay: 0.7s; }
-.wave-bar:nth-child(9) { animation-delay: 0.8s; }
-.wave-bar:nth-child(10) { animation-delay: 0.9s; }
+.wave-bar:nth-child(1) {
+  animation-delay: 0s;
+}
+.wave-bar:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.wave-bar:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.wave-bar:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.wave-bar:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.wave-bar:nth-child(6) {
+  animation-delay: 0.5s;
+}
+.wave-bar:nth-child(7) {
+  animation-delay: 0.6s;
+}
+.wave-bar:nth-child(8) {
+  animation-delay: 0.7s;
+}
+.wave-bar:nth-child(9) {
+  animation-delay: 0.8s;
+}
+.wave-bar:nth-child(10) {
+  animation-delay: 0.9s;
+}
 
 /* Progress ring */
 .progress-ring {

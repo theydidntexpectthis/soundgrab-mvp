@@ -13,78 +13,85 @@ interface RecentSearchesProps {
 
 export function RecentSearches({ onSelect }: RecentSearchesProps) {
   const { data: recentSearches, isLoading } = useQuery<SearchHistory[]>({
-    queryKey: ['search-history'],
+    queryKey: ["search-history"],
     queryFn: () => getSearchHistory(),
   });
-  
+
   const { setCurrentTrack, addToQueue } = usePlayback();
-  
+
   const handlePlayTrack = (track: any) => {
     if (track) {
       setCurrentTrack(track);
       addToQueue(track);
     }
   };
-  
+
   const handleSelect = (query: string) => {
     onSelect(query);
   };
-  
+
   return (
     <section className="mb-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-heading font-bold">Recent Searches</h2>
-          <Button variant="link" className="text-sm text-primary hover:underline">
+          <Button
+            variant="link"
+            className="text-sm text-primary hover:underline"
+          >
             View All
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {isLoading ? (
             // Loading skeleton
-            Array(4).fill(0).map((_, i) => (
-              <Card key={i} className="bg-surface p-3 rounded-lg">
-                <CardContent className="p-0">
-                  <Skeleton className="w-full h-32 rounded-md mb-2" />
-                  <Skeleton className="w-3/4 h-4 mb-2" />
-                  <Skeleton className="w-1/2 h-3" />
-                </CardContent>
-              </Card>
-            ))
+            Array(4)
+              .fill(0)
+              .map((_, i) => (
+                <Card key={i} className="bg-surface p-3 rounded-lg">
+                  <CardContent className="p-0">
+                    <Skeleton className="w-full h-32 rounded-md mb-2" />
+                    <Skeleton className="w-3/4 h-4 mb-2" />
+                    <Skeleton className="w-1/2 h-3" />
+                  </CardContent>
+                </Card>
+              ))
           ) : recentSearches && recentSearches.length > 0 ? (
             recentSearches.map((item) => (
-              <Card 
-                key={item.id} 
+              <Card
+                key={item.id}
                 className="bg-surface p-3 rounded-lg hover:bg-surface-light transition-all cursor-pointer"
                 onClick={() => handleSelect(item.query)}
               >
                 <CardContent className="p-0">
                   <div className="relative mb-2">
                     {/* Audio visualization SVG */}
-                    <svg 
-                      viewBox="0 0 100 100" 
+                    <svg
+                      viewBox="0 0 100 100"
                       className="w-full h-32 object-cover rounded-md"
                       style={{ background: "hsl(var(--surface-light))" }}
                     >
                       {/* Generate random audio waveform */}
-                      {Array(20).fill(0).map((_, i) => {
-                        const height = 30 + Math.random() * 40;
-                        return (
-                          <rect 
-                            key={i} 
-                            x={i * 5} 
-                            y={(100 - height) / 2}
-                            width="3" 
-                            height={height}
-                            rx="1"
-                            fill="hsl(var(--primary))"
-                            opacity={0.6 + Math.random() * 0.4}
-                          />
-                        );
-                      })}
+                      {Array(20)
+                        .fill(0)
+                        .map((_, i) => {
+                          const height = 30 + Math.random() * 40;
+                          return (
+                            <rect
+                              key={i}
+                              x={i * 5}
+                              y={(100 - height) / 2}
+                              width="3"
+                              height={height}
+                              rx="1"
+                              fill="hsl(var(--primary))"
+                              opacity={0.6 + Math.random() * 0.4}
+                            />
+                          );
+                        })}
                     </svg>
-                    
+
                     <Button
                       size="icon"
                       className="absolute bottom-2 right-2 bg-primary hover:bg-primary/90 text-white rounded-full p-2 opacity-90 hover:opacity-100 transition-all"
@@ -102,7 +109,9 @@ export function RecentSearches({ onSelect }: RecentSearchesProps) {
                   </div>
                   <h3 className="font-medium text-sm truncate">{item.query}</h3>
                   {item.track && (
-                    <p className="text-text-secondary text-xs truncate">{item.track.artist}</p>
+                    <p className="text-text-secondary text-xs truncate">
+                      {item.track.artist}
+                    </p>
                   )}
                 </CardContent>
               </Card>

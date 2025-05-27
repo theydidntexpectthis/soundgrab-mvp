@@ -31,9 +31,10 @@ export function AudioPlayer({
   useEffect(() => {
     if (audioRef.current) {
       if (autoPlay) {
-        audioRef.current.play()
+        audioRef.current
+          .play()
           .then(() => setIsPlaying(true))
-          .catch(err => console.error("Auto play failed:", err));
+          .catch((err) => console.error("Auto play failed:", err));
       }
     }
   }, [autoPlay, src]);
@@ -45,12 +46,13 @@ export function AudioPlayer({
         setIsPlaying(false);
         onPause?.();
       } else {
-        audioRef.current.play()
+        audioRef.current
+          .play()
           .then(() => {
             setIsPlaying(true);
             onPlay?.();
           })
-          .catch(err => console.error("Play failed:", err));
+          .catch((err) => console.error("Play failed:", err));
       }
     }
   };
@@ -109,7 +111,7 @@ export function AudioPlayer({
           onEnded?.();
         }}
       />
-      
+
       <div className="flex items-center space-x-2 mb-1">
         <Button
           type="button"
@@ -120,7 +122,7 @@ export function AudioPlayer({
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </Button>
-        
+
         <Slider
           value={[currentTime]}
           min={0}
@@ -129,7 +131,7 @@ export function AudioPlayer({
           onValueChange={handleSeek}
           className="flex-1"
         />
-        
+
         <Button
           type="button"
           size="icon"
@@ -139,7 +141,7 @@ export function AudioPlayer({
         >
           {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
         </Button>
-        
+
         <Slider
           value={[isMuted ? 0 : volume]}
           min={0}
@@ -149,7 +151,7 @@ export function AudioPlayer({
           className="w-20"
         />
       </div>
-      
+
       <div className="flex justify-between text-text-secondary text-xs">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>

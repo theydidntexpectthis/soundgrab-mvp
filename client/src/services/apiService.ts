@@ -1,6 +1,11 @@
 import { SearchResult, Track } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { mockSearchResults, mockSearchHistory, mockDownloads, mockTracks } from "./mockData";
+import {
+  mockSearchResults,
+  mockSearchHistory,
+  mockDownloads,
+  mockTracks,
+} from "./mockData";
 
 // Flag to toggle between mock data and real API
 const USE_MOCK_DATA = true; // Set to false when API is ready
@@ -11,26 +16,32 @@ const USE_MOCK_DATA = true; // Set to false when API is ready
  * @param sortBy Sort method
  * @returns Search results
  */
-export async function searchTracks(query: string, sortBy: string = 'relevance'): Promise<SearchResult> {
+export async function searchTracks(
+  query: string,
+  sortBy: string = "relevance",
+): Promise<SearchResult> {
   if (USE_MOCK_DATA) {
     console.log("Using mock search data");
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     // Check if this looks like a lyrics search (longer query)
-    if (query.split(' ').length > 6) {
+    if (query.split(" ").length > 6) {
       return searchByLyrics(query);
     }
-    
+
     return mockSearchResults;
   }
-  
-  const response = await apiRequest("GET", `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`);
-  
+
+  const response = await apiRequest(
+    "GET",
+    `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`,
+  );
+
   if (!response.ok) {
-    throw new Error('Failed to search for tracks');
+    throw new Error("Failed to search for tracks");
   }
-  
+
   return response.json();
 }
 
@@ -43,37 +54,51 @@ export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
   if (USE_MOCK_DATA) {
     console.log("Using mock lyrics search");
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // For demo purposes, if the lyrics contain specific words, return matching tracks
     const lyricsLower = lyrics.toLowerCase();
     let mainResult = mockTracks[0]; // Default to first track
-    
-    if (lyricsLower.includes("never gonna give you up") || lyricsLower.includes("strangers to love")) {
+
+    if (
+      lyricsLower.includes("never gonna give you up") ||
+      lyricsLower.includes("strangers to love")
+    ) {
       mainResult = mockTracks[0]; // Rick Astley
-    } else if (lyricsLower.includes("gangnam") || lyricsLower.includes("style")) {
+    } else if (
+      lyricsLower.includes("gangnam") ||
+      lyricsLower.includes("style")
+    ) {
       mainResult = mockTracks[2]; // Gangnam Style
     } else if (lyricsLower.includes("despacito")) {
       mainResult = mockTracks[3]; // Despacito
-    } else if (lyricsLower.includes("shape of you") || lyricsLower.includes("bed of my love")) {
+    } else if (
+      lyricsLower.includes("shape of you") ||
+      lyricsLower.includes("bed of my love")
+    ) {
       mainResult = mockTracks[4]; // Shape of You
     }
-    
+
     // Filter out the main result from other results
-    const otherResults = mockTracks.filter(track => track.id !== mainResult.id);
-    
+    const otherResults = mockTracks.filter(
+      (track) => track.id !== mainResult.id,
+    );
+
     return {
       mainResult,
-      otherResults: otherResults.slice(0, 4) // Limit to 4 other results
+      otherResults: otherResults.slice(0, 4), // Limit to 4 other results
     };
   }
-  
-  const response = await apiRequest("GET", `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`);
-  
+
+  const response = await apiRequest(
+    "GET",
+    `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`,
+  );
+
   if (!response.ok) {
-    throw new Error('Failed to search by lyrics');
+    throw new Error("Failed to search by lyrics");
   }
-  
+
   return response.json();
 }
 
@@ -84,16 +109,16 @@ export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
 export async function getSearchHistory(): Promise<any[]> {
   if (USE_MOCK_DATA) {
     console.log("Using mock search history");
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return mockSearchHistory;
   }
-  
+
   const response = await apiRequest("GET", "/api/searches/history");
-  
+
   if (!response.ok) {
-    throw new Error('Failed to get search history');
+    throw new Error("Failed to get search history");
   }
-  
+
   return response.json();
 }
 
@@ -103,24 +128,27 @@ export async function getSearchHistory(): Promise<any[]> {
  * @param format Format (mp3, mp4, wav)
  * @returns Download URL
  */
-export async function downloadTrack(track: Track, format: string = 'mp3'): Promise<string> {
+export async function downloadTrack(
+  track: Track,
+  format: string = "mp3",
+): Promise<string> {
   if (USE_MOCK_DATA) {
     console.log("Using mock download");
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    return `/api/downloads/files/${track.artist.replace(/\s+/g, '_').toLowerCase()}-${track.title.replace(/\s+/g, '_').toLowerCase()}.${format}`;
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return `/api/downloads/files/${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
   }
-  
+
   const response = await apiRequest("POST", "/api/downloads", {
     videoId: track.videoId,
     format,
     title: track.title,
-    artist: track.artist
+    artist: track.artist,
   });
-  
+
   if (!response.ok) {
-    throw new Error('Failed to download track');
+    throw new Error("Failed to download track");
   }
-  
+
   const data = await response.json();
   return data.downloadUrl;
 }
@@ -132,16 +160,16 @@ export async function downloadTrack(track: Track, format: string = 'mp3'): Promi
 export async function getDownloadHistory(): Promise<any[]> {
   if (USE_MOCK_DATA) {
     console.log("Using mock download history");
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return mockDownloads;
   }
-  
+
   const response = await apiRequest("GET", "/api/downloads/history");
-  
+
   if (!response.ok) {
-    throw new Error('Failed to get download history');
+    throw new Error("Failed to get download history");
   }
-  
+
   return response.json();
 }
 
@@ -151,23 +179,29 @@ export async function getDownloadHistory(): Promise<any[]> {
  * @param artist Track artist
  * @returns Lyrics text
  */
-export async function getLyrics(title: string, artist: string): Promise<string> {
+export async function getLyrics(
+  title: string,
+  artist: string,
+): Promise<string> {
   if (USE_MOCK_DATA) {
     console.log("Using mock lyrics");
-    await new Promise(resolve => setTimeout(resolve, 700));
+    await new Promise((resolve) => setTimeout(resolve, 700));
     // Return some mock lyrics based on the title
     if (title.toLowerCase().includes("never gonna give you up")) {
       return "We're no strangers to love\nYou know the rules and so do I\nA full commitment's what I'm thinking of\nYou wouldn't get this from any other guy\nI just wanna tell you how I'm feeling\nGotta make you understand\n\nNever gonna give you up\nNever gonna let you down\nNever gonna run around and desert you\nNever gonna make you cry\nNever gonna say goodbye\nNever gonna tell a lie and hurt you";
     }
     return "Lyrics not found for this track.";
   }
-  
-  const response = await apiRequest("GET", `/api/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`);
-  
+
+  const response = await apiRequest(
+    "GET",
+    `/api/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`,
+  );
+
   if (!response.ok) {
-    throw new Error('Failed to get lyrics');
+    throw new Error("Failed to get lyrics");
   }
-  
+
   const data = await response.json();
   return data.lyrics;
 }
