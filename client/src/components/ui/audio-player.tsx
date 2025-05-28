@@ -28,31 +28,75 @@ export function AudioPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // State to track loading and error states
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   useEffect(() => {
     if (audioRef.current) {
       // Set audio properties
       audioRef.current.preload = "auto";
       audioRef.current.volume = volume;
       audioRef.current.muted = isMuted;
+      audioRef.current.crossOrigin = "anonymous"; // Enable CORS for external audio
+      
+      // Reset error state when source changes
+      setHasError(false);
+      setErrorMessage("");
+      
+      // Add error handler
+      const handleError = (e: Event) => {
+        console.error("Audio error:", e);
+        setHasError(true);
+        setIsPlaying(false);
+        setErrorMessage("Could not play this audio file. The file may be missing or in an unsupported format.");
+      };
+      
+      audioRef.current.addEventListener("error", handleError);
       
       // Handle autoplay if enabled
       if (autoPlay) {
-        // Small delay to ensure audio is loaded
-        setTimeout(() => {
-          audioRef.current
-            ?.play()
-            .then(() => setIsPlaying(true))
-            .catch((err) => {
-              console.error("Auto play failed:", err);
-              // Try again with user interaction simulation
-              document.addEventListener('click', function playOnClick() {
-                audioRef.current?.play()
-                  .then(() => setIsPlaying(true))
-                  .catch(e => console.error("Play on click failed:", e));
-                document.removeEventListener('click', playOnClick);
-              }, { once: true });
-            });
-        }, 100);
+        setIsLoading(true);
+        // Verify file exists before attempting to play
+        fetch(src, { method: 'HEAD' })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("File not found");
+            }
+            // Small delay to ensure audio is loaded
+            return new Promise(resolve => setTimeout(resolve, 100));
+          })
+          .then(() => {
+            if (audioRef.current) {
+              return audioRef.current.play();
+            }
+          })
+          .then(() => {
+            setIsPlaying(true);
+            setIsLoading(false);
+          })
+          .catch((err) => {
+            console.error("Auto play failed:", err);
+            setIsLoading(false);
+            
+            // Try again with user interaction simulation
+            document.addEventListener('click', function playOnClick() {
+              setIsLoading(true);
+              audioRef.current?.play()
+                .then(() => {
+                  setIsPlaying(true);
+                  setIsLoading(false);
+                })
+                .catch(e => {
+                  console.error("Play on click failed:", e);
+                  setIsLoading(false);
+                  setHasError(true);
+                  setErrorMessage("Could not play this audio file after user interaction.");
+                });
+              document.removeEventListener('click', playOnClick);
+            }, { once: true });
+          });
       }
     }
     
@@ -60,6 +104,7 @@ export function AudioPlayer({
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.removeEventListener("error", () => {});
       }
     };
   }, [autoPlay, src, volume, isMuted]);
@@ -137,6 +182,12 @@ export function AudioPlayer({
         }}
       />
 
+      {hasError && (
+        <div className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-xs p-2 rounded-md mb-2">
+          {errorMessage}
+        </div>
+      )}
+
       <div className="flex items-center space-x-2 mb-1">
         <Button
           type="button"
@@ -177,7 +228,7 @@ export function AudioPlayer({
         />
       </div>
 
-      <div className="flex justify-between text-text-secondary text-xs">
+      <div className="flex justify-between text-black dark:text-gray-300 text-xs">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>

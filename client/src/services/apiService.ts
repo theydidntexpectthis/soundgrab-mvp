@@ -10,6 +10,50 @@ import {
 // Flag to toggle between mock data and real API
 const USE_MOCK_DATA = false; // Using real API connections
 
+// RapidAPI configuration
+// RapidAPI key configuration
+const RAPIDAPI_KEY = "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
+const RAPIDAPI_HOST_YT = "youtube-search-and-download.p.rapidapi.com";
+const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com";
+const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com";
+
+/**
+ * Make a request to RapidAPI
+ * @param host RapidAPI host
+ * @param endpoint API endpoint
+ * @param params Query parameters
+ * @returns Response from the API
+ */
+async function rapidApiRequest(host: string, endpoint: string, params: Record<string, string> = {}) {
+  const url = new URL(`https://${host}${endpoint}`);
+  
+  // Add query parameters
+  Object.entries(params).forEach(([key, value]) => {
+    url.searchParams.append(key, value);
+  });
+  
+  const options = {
+    method: 'GET',
+    headers: {
+      'X-RapidAPI-Key': RAPIDAPI_KEY,
+      'X-RapidAPI-Host': host
+    }
+  };
+  
+  try {
+    const response = await fetch(url.toString(), options);
+    
+    if (!response.ok) {
+      throw new Error(`RapidAPI request failed with status ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('RapidAPI request failed:', error);
+    throw error;
+  }
+}
+
 /**
  * Search for tracks by query
  * @param query Search query (title, artist, or lyrics)
@@ -33,16 +77,63 @@ export async function searchTracks(
     return mockSearchResults;
   }
 
-  const response = await apiRequest(
-    "GET",
-    `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`,
-  );
+  try {
+    // Search YouTube via RapidAPI
+    const ytData = await rapidApiRequest(
+      RAPIDAPI_HOST_YT,
+      '/search',
+      { query, type: 'v', sort: sortBy }
+    );
 
-  if (!response.ok) {
-    throw new Error("Failed to search for tracks");
+    if (!ytData || !ytData.contents) {
+      throw new Error("Invalid response from YouTube API");
+    }
+
+    // Map YouTube results to our Track schema
+    const tracks: Track[] = ytData.contents
+      .filter((item: any) => item.type === 'video')
+      .map((item: any) => {
+        const video = item.video;
+        return {
+          id: video.videoId,
+          videoId: video.videoId,
+          title: video.title,
+          artist: video.author?.name || 'Unknown Artist',
+          thumbnailUrl: video.thumbnails?.[0]?.url,
+          duration: video.lengthSeconds || 0,
+          views: video.viewCountText ? parseInt(video.viewCountText.replace(/[^0-9]/g, '')) : 0,
+          description: video.description || '',
+          publishDate: video.publishedTimeText || '',
+        };
+      });
+
+    // Format response according to our schema
+    const mainResult = tracks.length > 0 ? tracks[0] : null;
+    const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
+
+    if (!mainResult) {
+      throw new Error("No results found");
+    }
+
+    return {
+      mainResult,
+      otherResults
+    };
+  } catch (error) {
+    console.error("Failed to search tracks via RapidAPI:", error);
+    
+    // Fallback to our backend API
+    const response = await apiRequest(
+      "GET",
+      `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`,
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to search for tracks");
+    }
+
+    return response.json();
   }
-
-  return response.json();
 }
 
 /**
@@ -90,16 +181,109 @@ export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
     };
   }
 
-  const response = await apiRequest(
-    "GET",
-    `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`,
-  );
+  try {
+    // Search for songs by lyrics using RapidAPI Genius endpoint
+    const lyricsData = await rapidApiRequest(
+      RAPIDAPI_HOST_LYRICS,
+      '/search',
+      { q: lyrics }
+    );
 
-  if (!response.ok) {
-    throw new Error("Failed to search by lyrics");
+    if (!lyricsData || !lyricsData.hits || !lyricsData.hits.length) {
+      throw new Error("No lyrics results found");
+    }
+
+    // Get the top result
+    const topResult = lyricsData.hits[0].result;
+    
+    // Now search YouTube for this song to get video details
+    const songQuery = `${topResult.title} ${topResult.primary_artist.name}`;
+    const ytResults = await searchTracks(songQuery);
+    
+    // Add lyrics info to the track
+    if (ytResults.mainResult) {
+      ytResults.mainResult.lyrics = await getLyrics(
+        ytResults.mainResult.title,
+        ytResults.mainResult.artist
+      ).catch(() => "Lyrics not available");
+    }
+    
+    return ytResults;
+  } catch (error) {
+    console.error("Failed to search by lyrics via RapidAPI:", error);
+    
+    // Fallback to our backend API
+    const response = await apiRequest(
+      "GET",
+      `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`,
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to search by lyrics");
+    }
+
+    return response.json();
   }
+}
 
-  return response.json();
+/**
+ * Search for tracks on Spotify
+ * @param query Search query
+ * @returns Search results
+ */
+export async function searchSpotify(query: string): Promise<SearchResult> {
+  if (USE_MOCK_DATA) {
+    console.log("Using mock Spotify search");
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return mockSearchResults;
+  }
+  
+  try {
+    // Search Spotify via RapidAPI
+    const spotifyData = await rapidApiRequest(
+      RAPIDAPI_HOST_SPOTIFY,
+      '/search/',
+      { q: query, type: 'tracks', limit: '10' }
+    );
+    
+    if (!spotifyData || !spotifyData.tracks || !spotifyData.tracks.items) {
+      throw new Error("Invalid response from Spotify API");
+    }
+    
+    // Map Spotify results to our Track schema
+    const tracks: Track[] = spotifyData.tracks.items.map((item: any) => {
+      return {
+        id: item.id,
+        videoId: item.id, // Use Spotify ID as videoId for now
+        title: item.name,
+        artist: item.artists.map((artist: any) => artist.name).join(', '),
+        thumbnailUrl: item.album?.images?.[0]?.url,
+        duration: Math.floor(item.duration_ms / 1000),
+        views: item.popularity * 10000, // Convert popularity to estimated views
+        description: `${item.name} by ${item.artists.map((artist: any) => artist.name).join(', ')}`,
+        publishDate: item.album?.release_date,
+        previewUrl: item.preview_url,
+      };
+    });
+    
+    // Format response according to our schema
+    const mainResult = tracks.length > 0 ? tracks[0] : null;
+    const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
+    
+    if (!mainResult) {
+      throw new Error("No Spotify results found");
+    }
+    
+    return {
+      mainResult,
+      otherResults
+    };
+  } catch (error) {
+    console.error("Failed to search Spotify via RapidAPI:", error);
+    
+    // Fallback to YouTube search
+    return searchTracks(query);
+  }
 }
 
 /**
@@ -193,15 +377,47 @@ export async function getLyrics(
     return "Lyrics not found for this track.";
   }
 
-  const response = await apiRequest(
-    "GET",
-    `/api/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`,
-  );
+  try {
+    // First search for the song on Genius
+    const searchData = await rapidApiRequest(
+      RAPIDAPI_HOST_LYRICS,
+      '/search',
+      { q: `${title} ${artist}` }
+    );
+    
+    if (!searchData || !searchData.hits || !searchData.hits.length) {
+      throw new Error("No song found on Genius");
+    }
+    
+    // Get the song ID from the top result
+    const songId = searchData.hits[0].result.id;
+    
+    // Get the lyrics for this song
+    const lyricsData = await rapidApiRequest(
+      RAPIDAPI_HOST_LYRICS,
+      `/song/lyrics/?id=${songId}`,
+      {}
+    );
+    
+    if (!lyricsData || !lyricsData.lyrics || !lyricsData.lyrics.lyrics) {
+      throw new Error("No lyrics found for this song");
+    }
+    
+    return lyricsData.lyrics.lyrics.body || "Lyrics not available";
+  } catch (error) {
+    console.error("Failed to get lyrics via RapidAPI:", error);
+    
+    // Fallback to our backend API
+    const response = await apiRequest(
+      "GET",
+      `/api/lyrics?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`,
+    );
 
-  if (!response.ok) {
-    throw new Error("Failed to get lyrics");
+    if (!response.ok) {
+      throw new Error("Failed to get lyrics");
+    }
+
+    const data = await response.json();
+    return data.lyrics || "Lyrics not found for this track.";
   }
-
-  const data = await response.json();
-  return data.lyrics;
 }

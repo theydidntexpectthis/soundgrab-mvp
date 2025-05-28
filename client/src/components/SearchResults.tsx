@@ -146,9 +146,9 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-heading font-bold">Search Results</h2>
           <div className="flex items-center">
-            <span className="text-sm text-text-secondary mr-2">Sort by:</span>
+            <span className="text-sm text-black dark:text-gray-300 mr-2">Sort by:</span>
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="bg-surface-light text-text-primary text-sm p-1 rounded border-none outline-none w-36">
+              <SelectTrigger className="bg-surface-light text-black dark:text-white text-sm p-1 rounded border-none outline-none w-36">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -190,7 +190,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
         ) : isError ? (
           <Card className="bg-surface rounded-lg overflow-hidden mb-6 p-8 text-center">
             <h3 className="text-lg font-medium mb-2">Search Error</h3>
-            <p className="text-text-secondary mb-4">
+            <p className="text-black dark:text-gray-300 mb-4">
               Sorry, we couldn't find any results. Please try again.
             </p>
             <Button>Try Again</Button>
@@ -248,7 +248,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                         <h2 className="text-xl font-heading font-bold">
                           {searchResults.mainResult.title}
                         </h2>
-                        <p className="text-text-secondary">
+                        <p className="text-black dark:text-gray-300">
                           {searchResults.mainResult.artist}
                         </p>
                       </div>
@@ -275,7 +275,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="bg-surface-light hover:bg-surface/90 text-text-primary py-2 px-3 rounded-lg transition-all"
+                              className="bg-surface-light hover:bg-surface/90 text-black dark:text-white py-2 px-3 rounded-lg transition-all"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -315,7 +315,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                       </div>
                     </div>
                     <div className="mb-4">
-                      <div className="flex items-center text-text-secondary text-sm mb-2">
+                      <div className="flex items-center text-black dark:text-gray-300 text-sm mb-2">
                         <span className="mr-3">
                           <Play className="h-4 w-4 inline mr-1" />{" "}
                           {searchResults.mainResult.views} views
@@ -331,7 +331,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                           </span>
                         )}
                       </div>
-                      <p className="text-text-secondary text-sm line-clamp-2">
+                      <p className="text-black dark:text-gray-300 text-sm line-clamp-2">
                         {searchResults.mainResult.description ||
                           `"${searchResults.mainResult.title}" is a song by ${searchResults.mainResult.artist}.`}
                       </p>
@@ -351,7 +351,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                   <h3 className="font-heading font-semibold mb-2">
                     Lyrics Preview
                   </h3>
-                  <p className="text-text-secondary text-sm mb-4 line-clamp-4 whitespace-pre-line">
+                  <p className="text-black dark:text-gray-300 text-sm mb-4 line-clamp-4 whitespace-pre-line">
                     {searchResults.mainResult.lyrics}
                   </p>
                   <Button
@@ -367,11 +367,11 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
             {/* Ad Placement - Between Results */}
             <div className="bg-surface-light rounded-lg p-4 mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs text-text-secondary mb-1">Sponsored</p>
-                <div className="text-sm mb-1">
+                <p className="text-xs text-black dark:text-gray-300 mb-1">Sponsored</p>
+                <div className="text-sm mb-1 text-black dark:text-white">
                   Try Premium Music Production Tools
                 </div>
-                <p className="text-xs text-text-secondary">
+                <p className="text-xs text-black dark:text-gray-300">
                   Professional-grade audio editing software for creators.
                 </p>
               </div>
@@ -416,7 +416,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                             <h3 className="font-medium text-sm">
                               {result.title}
                             </h3>
-                            <p className="text-text-secondary text-xs">
+                            <p className="text-black dark:text-gray-300 text-xs">
                               {result.artist}
                             </p>
                           </div>
@@ -424,7 +424,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="bg-surface-light hover:bg-primary/20 text-text-primary p-1 rounded-full transition-all h-7 w-7"
+                              className="bg-surface-light hover:bg-primary/20 text-black dark:text-white p-1 rounded-full transition-all h-7 w-7"
                               onClick={() => handlePlay(result)}
                             >
                               <Play className="h-3 w-3" />
@@ -432,7 +432,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="bg-surface-light hover:bg-primary/20 text-text-primary p-1 rounded-full transition-all h-7 w-7"
+                              className="bg-surface-light hover:bg-primary/20 text-black dark:text-white p-1 rounded-full transition-all h-7 w-7"
                               onClick={() => handleDownload(result)}
                               disabled={isDownloading[result.id]}
                             >
@@ -451,7 +451,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
                               style={{ width: `${Math.random() * 100}%` }}
                             ></div>
                           </div>
-                          <div className="flex justify-between text-text-secondary text-xs mt-1">
+                          <div className="flex justify-between text-black dark:text-gray-300 text-xs mt-1">
                             <span>
                               {formatTime(Math.random() * result.duration)}
                             </span>
@@ -467,7 +467,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
             <div className="flex justify-center">
               <Button
                 variant="outline"
-                className="bg-surface hover:bg-surface-light text-text-primary py-2 px-6 rounded-full transition-all"
+                className="bg-surface hover:bg-surface-light text-black dark:text-white py-2 px-6 rounded-full transition-all"
                 onClick={handleLoadMore}
               >
                 Load More
@@ -477,7 +477,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
         ) : (
           <Card className="bg-surface rounded-lg overflow-hidden mb-6 p-8 text-center">
             <h3 className="text-lg font-medium mb-2">No Results Found</h3>
-            <p className="text-text-secondary mb-4">
+            <p className="text-black dark:text-gray-300 mb-4">
               We couldn't find any results for "{searchQuery}". Try different
               keywords.
             </p>

@@ -34,6 +34,13 @@ export const initiateDownload = async (
     // Optimize resource loading
     await optimizeResourceLoading("media");
 
+    // Construct the expected file path for the downloaded file
+    const fileName = `${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
+    const filePath = `/api/downloads/files/${fileName}`;
+    
+    console.log(`Download initiated for: ${track.title} (${format})`);
+    console.log(`Expected file path: ${filePath}`);
+
     // Track successful download
     trackEvent("download", "complete", `${track.title} - ${format}`);
 
@@ -48,6 +55,32 @@ export const initiateDownload = async (
     console.error("Download error:", error);
     return false;
   }
+};
+
+/**
+ * Check if a file exists on the server
+ * @param url URL of the file to check
+ * @returns Promise resolving to boolean indicating if file exists
+ */
+export const checkFileExists = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch (error) {
+    console.error("Error checking file existence:", error);
+    return false;
+  }
+};
+
+/**
+ * Get the full URL for a downloaded track
+ * @param track Track object
+ * @param format File format (mp3, wav, etc.)
+ * @returns URL string for the downloaded file
+ */
+export const getDownloadedFileUrl = (track: any, format: string = "mp3"): string => {
+  const fileName = `${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
+  return `/api/downloads/files/${fileName}`;
 };
 
 // Function to simulate loading state with progress feedback

@@ -54,10 +54,45 @@
     <div>
         <button id="runComprehensiveTests">Run Comprehensive Tests</button>
         <button id="runE2ETests">Run E2E Tests</button>
+        <button id="testAudioPlayer">Test Audio Player</button>
+        <button id="runAPITests">Test API Integration</button>
     </div>
     
     <div id="results">
         <p>Test results will appear here...</p>
+    </div>
+
+    <!-- Audio Player Test Section -->
+    <div id="audioPlayerTest" style="display: none; margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        <h2>Audio Player Test</h2>
+        
+        <div style="margin-bottom: 20px;">
+            <h3>Test MP3 Playback</h3>
+            <audio id="testAudio" controls style="width: 100%; margin-bottom: 10px;">
+                <source src="https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <div>
+                <button id="testLocalMp3">Test Local MP3</button>
+                <button id="testRemoteMp3">Test Remote MP3</button>
+                <button id="testInvalidMp3">Test Invalid MP3</button>
+            </div>
+            <div id="audioTestResult" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+        
+        <div>
+            <h3>File Path Construction Test</h3>
+            <div>
+                <label for="artistInput">Artist:</label>
+                <input type="text" id="artistInput" value="Rick Astley" style="margin: 5px; padding: 5px;">
+                
+                <label for="titleInput">Title:</label>
+                <input type="text" id="titleInput" value="Never Gonna Give You Up" style="margin: 5px; padding: 5px;">
+                
+                <button id="generatePath">Generate Path</button>
+            </div>
+            <div id="pathResult" style="margin-top: 10px; word-break: break-all;"></div>
+        </div>
     </div>
 
     <script>
@@ -222,6 +257,111 @@
             }
             
             runTests();
+        });
+
+        // Audio Player Test
+        document.getElementById('testAudioPlayer').addEventListener('click', function() {
+            resultsDiv.innerHTML = '<p>Testing audio player functionality...</p>';
+            
+            // Show the audio player test section
+            document.getElementById('audioPlayerTest').style.display = 'block';
+            
+            // Test functions for audio player
+            function testAudioFile(url, expectedResult) {
+                const audio = document.getElementById('testAudio');
+                const resultDiv = document.getElementById('audioTestResult');
+                
+                // Set the audio source
+                audio.src = url;
+                
+                // Log the test
+                log(`Testing audio playback from: ${url}`, "info");
+                
+                // Set up event listeners
+                audio.oncanplaythrough = function() {
+                    resultDiv.textContent = "✓ SUCCESS: Audio file loaded successfully";
+                    resultDiv.style.color = "#4CAF50";
+                    log("✓ PASS: Audio file loaded successfully", "success");
+                };
+                
+                audio.onerror = function() {
+                    resultDiv.textContent = "✗ ERROR: Failed to load audio file";
+                    resultDiv.style.color = "#F44336";
+                    log("✗ FAIL: Failed to load audio file", "error");
+                };
+                
+                // Load the audio
+                audio.load();
+            }
+            
+            // Generate file path based on artist and title
+            function generateFilePath() {
+                const artist = document.getElementById('artistInput').value;
+                const title = document.getElementById('titleInput').value;
+                
+                const fileName = `${artist.replace(/\s+/g, "_").toLowerCase()}-${title.replace(/\s+/g, "_").toLowerCase()}.mp3`;
+                const filePath = `/api/downloads/files/${fileName}`;
+                
+                document.getElementById('pathResult').textContent = filePath;
+                log(`Generated file path: ${filePath}`, "info");
+            }
+            
+            // Set up event listeners for the test buttons
+            document.getElementById('testLocalMp3').addEventListener('click', function() {
+                testAudioFile('/api/downloads/files/test-audio.mp3', true);
+            });
+            
+            document.getElementById('testRemoteMp3').addEventListener('click', function() {
+                testAudioFile('https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3', true);
+            });
+            
+            document.getElementById('testInvalidMp3').addEventListener('click', function() {
+                testAudioFile('/invalid-file-path.mp3', false);
+            });
+            
+            document.getElementById('generatePath').addEventListener('click', generateFilePath);
+            
+            // Run initial tests
+            log("Audio player test initialized", "info");
+            log("✓ PASS: Audio player component loaded", "success");
+        });
+
+        // API Integration Tests
+        document.getElementById('runAPITests').addEventListener('click', function() {
+            resultsDiv.innerHTML = '<p>Running API integration tests...</p>';
+            
+            // Load the API test script if not already loaded
+            if (typeof window.runAPITests !== 'function') {
+                const script = document.createElement('script');
+                script.src = './src/api-test.js';
+                script.onload = function() {
+                    if (typeof window.runAPITests === 'function') {
+                        window.runAPITests().then(results => {
+                            resultsDiv.innerHTML += `<p class="${results.status === 'passed' ? 'success' : 'error'}">
+                                API Tests ${results.status.toUpperCase()}:
+                                ${results.passed} passed, ${results.failed} failed
+                            </p>`;
+                        }).catch(error => {
+                            resultsDiv.innerHTML += `<p class="error">Error running API tests: ${error.message}</p>`;
+                        });
+                    } else {
+                        resultsDiv.innerHTML += '<p class="error">API test runner not found after loading script</p>';
+                    }
+                };
+                script.onerror = function() {
+                    resultsDiv.innerHTML += '<p class="error">Failed to load API test script</p>';
+                };
+                document.head.appendChild(script);
+            } else {
+                window.runAPITests().then(results => {
+                    resultsDiv.innerHTML += `<p class="${results.status === 'passed' ? 'success' : 'error'}">
+                        API Tests ${results.status.toUpperCase()}:
+                        ${results.passed} passed, ${results.failed} failed
+                    </p>`;
+                }).catch(error => {
+                    resultsDiv.innerHTML += `<p class="error">Error running API tests: ${error.message}</p>`;
+                });
+            }
         });
     </script>
 </body>

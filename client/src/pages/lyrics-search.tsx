@@ -33,12 +33,12 @@ export default function LyricsSearchPage() {
           {/* Tips and guide */}
           <div className="mt-6 p-4 bg-surface rounded-lg">
             <h3 className="text-lg font-medium mb-2">How it works</h3>
-            <p className="text-text-primary text-sm mb-3 font-medium">
+            <p className="text-black dark:text-white text-sm mb-3 font-medium">
               Our lyrics search uses AI to find songs that match the lyrics you
               enter. The more accurate the lyrics, the better the results.
             </p>
 
-            <h4 className="font-medium text-sm mt-4 mb-1">
+            <h4 className="font-medium text-sm mt-4 mb-1 text-black dark:text-white">
               Popular lyric searches:
             </h4>
             <div className="space-y-2 mt-2">
@@ -51,7 +51,7 @@ export default function LyricsSearchPage() {
                 <button
                   key={index}
                   onClick={() => handleSearch(example)}
-                  className="block w-full text-left p-2 text-sm bg-surface-light hover:bg-primary/10 rounded-md text-text-primary font-medium transition-colors"
+                  className="block w-full text-left p-2 text-sm bg-surface-light hover:bg-primary/10 rounded-md text-black dark:text-white font-medium transition-colors"
                 >
                   "{example}"
                 </button>
@@ -78,11 +78,11 @@ export default function LyricsSearchPage() {
             )
           ) : (
             <div className="flex flex-col items-center justify-center h-72 bg-surface rounded-lg">
-              <div className="text-text-secondary text-center p-6">
+              <div className="text-black dark:text-white text-center p-6">
                 <h3 className="text-xl font-medium mb-2">
                   Enter lyrics to search
                 </h3>
-                <p className="max-w-md">
+                <p className="max-w-md text-black dark:text-white">
                   Type or paste lyrics in the search box to find matching songs.
                   The more lyrics you provide, the more accurate the results
                   will be.
@@ -96,9 +96,9 @@ export default function LyricsSearchPage() {
       {/* Ad placement */}
       <div className="mt-8 bg-surface-light rounded-lg p-4 flex items-center justify-between">
         <div>
-          <p className="text-xs text-text-secondary mb-1">Sponsored</p>
-          <div className="text-sm mb-1">Try our premium lyrics search</div>
-          <p className="text-xs text-text-secondary">
+          <p className="text-xs text-black dark:text-gray-300 mb-1">Sponsored</p>
+          <div className="text-sm mb-1 text-black dark:text-white">Try our premium lyrics search</div>
+          <p className="text-xs text-black dark:text-gray-300">
             Find songs even with misheard lyrics and get exclusive content.
           </p>
         </div>

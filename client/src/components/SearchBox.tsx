@@ -164,11 +164,11 @@ export function SearchBox({ onSearch }: SearchBoxProps) {
   return (
     <div className="bg-surface rounded-xl p-6 shadow-lg">
       <div className="flex items-center bg-surface-light rounded-lg p-2 mb-4">
-        <Search className="text-text-secondary mx-2 h-5 w-5" />
+        <Search className="text-black dark:text-gray-300 mx-2 h-5 w-5" />
         <input
           type="text"
           placeholder="Search by song name, lyrics, or describe the music..."
-          className="w-full bg-transparent border-none outline-none text-text-primary placeholder-text-secondary"
+          className="w-full bg-transparent border-none outline-none text-black dark:text-white placeholder-text-black dark:placeholder-text-gray-300"
           value={searchQuery}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -182,7 +182,7 @@ export function SearchBox({ onSearch }: SearchBoxProps) {
         >
           <Mic
             className={cn(
-              "text-text-secondary hover:text-primary transition-colors",
+              "text-black dark:text-gray-300 hover:text-primary transition-colors",
               isRecording && "text-red-500 animate-pulse",
             )}
           />
@@ -193,35 +193,35 @@ export function SearchBox({ onSearch }: SearchBoxProps) {
         <Button
           variant="outline"
           size="sm"
-          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-text-secondary transition-all"
+          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-black dark:text-gray-300 transition-all"
         >
           <Music className="h-3 w-3 mr-1" /> Songs
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-text-secondary transition-all"
+          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-black dark:text-gray-300 transition-all"
         >
           <Mic className="h-3 w-3 mr-1" /> Artists
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-text-secondary transition-all"
+          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-black dark:text-gray-300 transition-all"
         >
           <AlignLeft className="h-3 w-3 mr-1" /> Lyrics
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-text-secondary transition-all"
+          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-black dark:text-gray-300 transition-all"
         >
           <Headphones className="h-3 w-3 mr-1" /> Podcasts
         </Button>
         <Button
           variant="outline"
           size="sm"
-          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-text-secondary transition-all"
+          className="px-3 py-1 rounded-full text-xs bg-surface-light hover:bg-primary/20 text-black dark:text-gray-300 transition-all"
         >
           <Video className="h-3 w-3 mr-1" /> Videos
         </Button>
@@ -236,7 +236,7 @@ export function SearchBox({ onSearch }: SearchBoxProps) {
         </Button>
         <Button
           variant="outline"
-          className="flex-1 py-2 px-4 bg-surface-light hover:bg-surface/90 text-text-primary rounded-lg font-medium transition-all"
+          className="flex-1 py-2 px-4 bg-surface-light hover:bg-surface/90 text-black dark:text-white rounded-lg font-medium transition-all"
           onClick={() => {
             const feelingLuckyQueries = [
               "top hits 2023",

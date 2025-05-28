@@ -32,7 +32,7 @@ export function LyricsSearchBox({
               <h3 className="text-lg font-medium">Search by Lyrics</h3>
             </div>
 
-            <p className="text-text-secondary text-sm mb-2">
+            <p className="text-black dark:text-gray-300 text-sm mb-2">
               Paste a few lines of lyrics to find the song you're looking for
             </p>
 
@@ -52,7 +52,7 @@ export function LyricsSearchBox({
               {isSearching ? "Searching..." : "Find Song"}
             </Button>
 
-            <div className="mt-2 text-xs text-text-secondary">
+            <div className="mt-2 text-xs text-black dark:text-gray-300">
               <p>Tips:</p>
               <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Enter at least a full line of lyrics for better results</li>
