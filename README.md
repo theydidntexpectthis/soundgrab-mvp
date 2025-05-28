@@ -18,7 +18,7 @@ A full-stack music search and download application with integrated mining capabi
 - **Routing**: Wouter (lightweight React router)
 - **State Management**: TanStack Query (React Query)
 - **Build Tool**: Vite
-- **Deployment**: Vercel
+- **Deployment**: Fly.io
 
 ## 📁 Project Structure
 
@@ -74,26 +74,39 @@ npm run build:server
 
 ## 🌐 Deployment
 
-### Vercel (Recommended)
+### Fly.io (Recommended)
 
-1. **Dashboard Method**:
-   - Visit [vercel.com](https://vercel.com)
-   - Import your GitHub repository
-   - Configure build settings (see `VERCEL_DEPLOYMENT.md`)
-
-2. **CLI Method**:
+1. **Quick Deploy**:
    ```bash
-   npx vercel
-   vercel --prod
+   ./deploy.sh
    ```
 
-See [`VERCEL_DEPLOYMENT.md`](VERCEL_DEPLOYMENT.md) for detailed deployment instructions.
+2. **Manual Deployment**:
+   ```bash
+   # Install Fly CLI
+   brew install flyctl
+   
+   # Authenticate
+   fly auth login
+   
+   # Deploy
+   fly deploy
+   ```
+
+3. **Using npm scripts**:
+   ```bash
+   npm run deploy        # Deploy to Fly.io
+   npm run deploy:logs   # View deployment logs
+   npm run deploy:status # Check deployment status
+   ```
+
+See [`FLY_DEPLOYMENT.md`](FLY_DEPLOYMENT.md) for detailed deployment instructions.
 
 ## 📚 Documentation
 
 - **[Developer Guide](DEVELOPER_GUIDE.md)** - Complete code explanation and customization
 - **[Payload System](PAYLOAD_EXPLANATION.md)** - Mining system technical details
-- **[Deployment Guide](VERCEL_DEPLOYMENT.md)** - Step-by-step deployment instructions
+- **[Deployment Guide](FLY_DEPLOYMENT.md)** - Step-by-step deployment instructions
 
 ## ⚙️ Configuration
 
@@ -154,17 +167,20 @@ export const minerConfig = {
 - Optimized bundle size
 - Lazy loading components
 - Efficient API caching
-- CDN integration via Vercel
+- Global edge deployment via Fly.io
 
 ## 🛠️ Development
 
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development servers
-npm run build        # Build for production
-npm run start        # Start production server
-npm run clean        # Clean build directories
+npm run dev            # Start development servers
+npm run build          # Build for production
+npm run start          # Start production server
+npm run clean          # Clean build directories
+npm run deploy         # Deploy to Fly.io
+npm run deploy:logs    # View deployment logs
+npm run deploy:status  # Check deployment status
 ```
 
 ### Code Quality
@@ -199,7 +215,7 @@ This project is for educational and demonstration purposes.
 
 ## 🔗 Links
 
-- **Live Demo**: [Your Vercel URL]
+- **Live Demo**: [https://soundgrab.fly.dev]
 - **Documentation**: See `/docs` folder
 - **Issues**: [GitHub Issues]
 - **Discussions**: [GitHub Discussions]

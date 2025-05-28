@@ -93,8 +93,8 @@ dist
 tmp/
 temp/
 
-# Vercel
-.vercel
+# Fly.io
+.fly/
 
 # Local development
 downloads/

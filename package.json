@@ -12,7 +12,10 @@
     "build:client": "cd client && npm run build",
     "build:server": "tsc --project server/tsconfig.json",
     "start": "node server/dist/index.js",
-    "clean": "rm -rf client/dist server/dist"
+    "clean": "rm -rf client/dist server/dist",
+    "deploy": "fly deploy",
+    "deploy:logs": "fly logs",
+    "deploy:status": "fly status"
   },
   "dependencies": {
     "axios": "^1.9.0",
