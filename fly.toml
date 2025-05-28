@@ -22,7 +22,3 @@ primary_region = "iad"
 [env]
   NODE_ENV = "production"
   PORT = "5000"
-
-[[statics]]
-  guest_path = "/app/client/dist"
-  url_prefix = "/"

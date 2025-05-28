@@ -25,9 +25,9 @@ WORKDIR /app/client
 RUN npm ci
 RUN npm run build
 
-# Copy server files
+# Build server TypeScript
 WORKDIR /app
-COPY server/prod-server.js ./server/
+RUN npm run build:server
 
 # Production image, copy all the files and run the app
 FROM base AS runner
@@ -39,6 +39,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
+COPY --from=builder /app/server/dist ./server/dist
 COPY --from=builder /app/server/prod-server.js ./server/
 COPY --from=builder /app/client/dist ./client/dist
 COPY --from=builder /app/package.json ./package.json
