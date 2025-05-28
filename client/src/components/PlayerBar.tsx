@@ -35,87 +35,93 @@ export function PlayerBar() {
       // Get the downloaded file path using our utility function
       const downloadedFilePath = getDownloadedFileUrl(currentTrack, "mp3");
       
-      // Check if the downloaded file exists
-      const fileExists = await checkFileExists(downloadedFilePath)
-        .catch(() => false);
-      
-      console.log(`Downloaded file ${downloadedFilePath} exists: ${fileExists}`);
-      
-      // Use previewUrl, audioUrl, downloaded file (if it exists), or fallback to a demo audio
-      const audioSrc =
-        currentTrack.previewUrl ||
-        currentTrack.audioUrl ||
-        (fileExists ? downloadedFilePath : null);
+      // Create an async function to check if the file exists
+      const setupAudio = async () => {
+        // Check if the downloaded file exists
+        const fileExists = await checkFileExists(downloadedFilePath)
+          .catch(() => false);
+        
+        console.log(`Downloaded file ${downloadedFilePath} exists: ${fileExists}`);
+        
+        // Use previewUrl, audioUrl, downloaded file (if it exists), or fallback to a demo audio
+        const audioSrc =
+          currentTrack.previewUrl ||
+          currentTrack.audioUrl ||
+          (fileExists ? downloadedFilePath : null);
 
-      // Ensure the audio source is valid with a proper fallback
-      const validAudioSrc = audioSrc || `https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3`;
-      
-      console.log("Attempting to play audio from:", validAudioSrc);
+        // Ensure the audio source is valid with a proper fallback
+        const validAudioSrc = audioSrc || `https://www.soundjay.com/misc/sounds/bell-ringing-01.mp3`;
+        
+        console.log("Attempting to play audio from:", validAudioSrc);
 
-      audio.src = validAudioSrc;
-      audio.volume = volume;
-      audio.muted = isMuted;
-      audio.crossOrigin = "anonymous"; // Enable CORS for external audio
-      audio.preload = "auto"; // Preload audio data
+        audio.src = validAudioSrc;
+        audio.volume = volume;
+        audio.muted = isMuted;
+        audio.crossOrigin = "anonymous"; // Enable CORS for external audio
+        audio.preload = "auto"; // Preload audio data
 
-      console.log(
-        "Setting up audio for:",
-        currentTrack.title,
-        "with URL:",
-        validAudioSrc,
-      );
+        console.log(
+          "Setting up audio for:",
+          currentTrack.title,
+          "with URL:",
+          validAudioSrc,
+        );
 
-      if (isPlaying) {
-        // Create a loading promise with timeout
-        const playWithTimeout = () => {
-          return Promise.race([
-            audio.play(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("Playback timeout")), 3000)
-            )
-          ]);
-        };
+        if (isPlaying) {
+          // Create a loading promise with timeout
+          const playWithTimeout = () => {
+            return Promise.race([
+              audio.play(),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Playback timeout")), 3000)
+              )
+            ]);
+          };
 
-        // Try to play the audio
-        playWithTimeout().catch((error) => {
-          console.error("Failed to play audio:", error);
-          toast({
-            title: "Playback Error",
-            description: "Could not play this track. Trying alternative source...",
-            variant: "destructive",
-          });
+          // Try to play the audio
+          playWithTimeout().catch((error) => {
+            console.error("Failed to play audio:", error);
+            toast({
+              title: "Playback Error",
+              description: "Could not play this track. Trying alternative source...",
+              variant: "destructive",
+            });
 
-          // Check if the file exists on the server before trying an alternative
-          fetch(audio.src, { method: 'HEAD' })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error("File not found");
-              }
-              // File exists, try playing again
-              return audio.play();
-            })
-            .catch(err => {
-              console.error("File not found or cannot be played:", err);
-              
-              // Try an alternative source with MP3 format for better compatibility
-              const alternativeSource = `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.mp3`;
-              console.log("Trying alternative source:", alternativeSource);
-              audio.src = alternativeSource;
-              
-              // Try to play again
-              audio.play().catch((playErr) => {
-                console.error("Alternative audio also failed:", playErr);
-                toast({
-                  title: "Playback Failed",
-                  description: "Could not play audio from any source. Please try another track.",
-                  variant: "destructive",
+            // Check if the file exists on the server before trying an alternative
+            fetch(audio.src, { method: 'HEAD' })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error("File not found");
+                }
+                // File exists, try playing again
+                return audio.play();
+              })
+              .catch(err => {
+                console.error("File not found or cannot be played:", err);
+                
+                // Try an alternative source with MP3 format for better compatibility
+                const alternativeSource = `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.mp3`;
+                console.log("Trying alternative source:", alternativeSource);
+                audio.src = alternativeSource;
+                
+                // Try to play again
+                audio.play().catch((playErr) => {
+                  console.error("Alternative audio also failed:", playErr);
+                  toast({
+                    title: "Playback Failed",
+                    description: "Could not play audio from any source. Please try another track.",
+                    variant: "destructive",
+                  });
                 });
               });
-            });
-        });
-      } else {
-        audio.pause();
-      }
+          });
+        } else {
+          audio.pause();
+        }
+      };
+      
+      // Execute the async function
+      setupAudio();
 
       // Set up event listeners
       const handleTimeUpdate = () => {

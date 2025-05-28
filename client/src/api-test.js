@@ -45,7 +45,7 @@ let testState = {
 };
 
 // Utility functions
-const log = (message, type = "info") => {
+const apiLog = (message, type = "info") => {
   if (!config.logResults) return;
 
   const styles = {
@@ -65,18 +65,18 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const assert = (condition, message) => {
   if (condition) {
     testState.passed++;
-    log(`✓ PASS: ${message}`, "success");
+    apiLog(`✓ PASS: ${message}`, "success");
     return true;
   } else {
     testState.failed++;
-    log(`✗ FAIL: ${message}`, "error");
+    apiLog(`✗ FAIL: ${message}`, "error");
     return false;
   }
 };
 
 const startCategory = (name) => {
   testState.currentCategory = name;
-  log(`\n===== Testing ${name} =====`, "category");
+  apiLog(`\n===== Testing ${name} =====`, "category");
 };
 
 // Import API functions
@@ -88,19 +88,19 @@ const {
 } = window.apiService || {};
 
 // Performance measurement
-const performance = {
+const perfMeasurement = {
   startTime: null,
   endTime: null,
   measurements: {},
   
   start: function(label) {
-    this.measurements[label] = { start: performance.now() };
+    this.measurements[label] = { start: window.performance.now() };
     return this.measurements[label].start;
   },
   
   end: function(label) {
     if (this.measurements[label]) {
-      this.measurements[label].end = performance.now();
+      this.measurements[label].end = window.performance.now();
       this.measurements[label].duration = this.measurements[label].end - this.measurements[label].start;
       return this.measurements[label].duration;
     }
@@ -123,7 +123,7 @@ const testCategories = {
   // 1. YouTube Search via RapidAPI
   youtubeSearch: [
     async () => {
-      log("Testing YouTube search via RapidAPI", "step");
+      apiLog("Testing YouTube search via RapidAPI", "step");
       
       try {
         // Check if the API function exists
@@ -142,7 +142,7 @@ const testCategories = {
         assert(Array.isArray(results.otherResults), "Search returned other results");
         
         if (results.mainResult) {
-          log(`Found main result: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
+          apiLog(`Found main result: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
           assert(results.mainResult.title.length > 0, "Main result has a title");
           assert(results.mainResult.artist.length > 0, "Main result has an artist");
           assert(results.mainResult.videoId.length > 0, "Main result has a videoId");
@@ -150,7 +150,7 @@ const testCategories = {
         
         return results !== null && results.mainResult !== undefined;
       } catch (error) {
-        log(`Error testing YouTube search: ${error.message}`, "error");
+        apiLog(`Error testing YouTube search: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -160,7 +160,7 @@ const testCategories = {
   // 2. Spotify Search via RapidAPI
   spotifySearch: [
     async () => {
-      log("Testing Spotify search via RapidAPI", "step");
+      apiLog("Testing Spotify search via RapidAPI", "step");
       
       try {
         // Check if the API function exists
@@ -179,7 +179,7 @@ const testCategories = {
         assert(Array.isArray(results.otherResults), "Spotify search returned other results");
         
         if (results.mainResult) {
-          log(`Found Spotify result: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
+          apiLog(`Found Spotify result: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
           assert(results.mainResult.title.length > 0, "Spotify result has a title");
           assert(results.mainResult.artist.length > 0, "Spotify result has an artist");
           assert(results.mainResult.previewUrl !== undefined, "Spotify result has preview URL info");
@@ -187,7 +187,7 @@ const testCategories = {
         
         return results !== null && results.mainResult !== undefined;
       } catch (error) {
-        log(`Error testing Spotify search: ${error.message}`, "error");
+        apiLog(`Error testing Spotify search: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -197,7 +197,7 @@ const testCategories = {
   // 3. Lyrics Search via RapidAPI
   lyricsSearch: [
     async () => {
-      log("Testing lyrics search via RapidAPI", "step");
+      apiLog("Testing lyrics search via RapidAPI", "step");
       
       try {
         // Check if the API function exists
@@ -215,14 +215,14 @@ const testCategories = {
         assert(results.mainResult !== undefined, "Lyrics search returned a main result");
         
         if (results.mainResult) {
-          log(`Found song from lyrics: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
+          apiLog(`Found song from lyrics: "${results.mainResult.title}" by ${results.mainResult.artist}`, "info");
           assert(results.mainResult.title.length > 0, "Lyrics result has a title");
           assert(results.mainResult.artist.length > 0, "Lyrics result has an artist");
         }
         
         return results !== null && results.mainResult !== undefined;
       } catch (error) {
-        log(`Error testing lyrics search: ${error.message}`, "error");
+        apiLog(`Error testing lyrics search: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -232,7 +232,7 @@ const testCategories = {
   // 4. Get Lyrics via RapidAPI
   getLyricsTest: [
     async () => {
-      log("Testing get lyrics via RapidAPI", "step");
+      apiLog("Testing get lyrics via RapidAPI", "step");
       
       try {
         // Check if the API function exists
@@ -250,11 +250,11 @@ const testCategories = {
         assert(typeof lyrics === 'string', "getLyrics returned a string");
         assert(lyrics.length > 100, "getLyrics returned substantial content");
         
-        log(`Retrieved lyrics with length: ${lyrics.length} characters`, "info");
+        apiLog(`Retrieved lyrics with length: ${lyrics.length} characters`, "info");
         
         return lyrics !== null && lyrics.length > 0;
       } catch (error) {
-        log(`Error testing getLyrics: ${error.message}`, "error");
+        apiLog(`Error testing getLyrics: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -264,7 +264,7 @@ const testCategories = {
   // 5. Error Handling and Fallbacks
   errorHandling: [
     async () => {
-      log("Testing error handling and fallbacks", "step");
+      apiLog("Testing error handling and fallbacks", "step");
       
       try {
         // Test with invalid query
@@ -284,7 +284,7 @@ const testCategories = {
         
         return true;
       } catch (error) {
-        log(`Error testing error handling: ${error.message}`, "error");
+        apiLog(`Error testing error handling: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -295,33 +295,33 @@ const testCategories = {
   performanceTesting: [
     async () => {
       if (!config.measurePerformance) {
-        log("Performance testing disabled, skipping", "info");
+        apiLog("Performance testing disabled, skipping", "info");
         return true;
       }
       
-      log("Testing API response times", "step");
+      apiLog("Testing API response times", "step");
       
       try {
         // Test YouTube search performance
-        log("Measuring YouTube search performance...", "info");
-        performance.start("youtube_search");
+        apiLog("Measuring YouTube search performance...", "info");
+        perfMeasurement.start("youtube_search");
         await searchTracks(config.testQueries.youtubeQuery);
-        const youtubeTime = performance.end("youtube_search");
-        log(`YouTube search took ${youtubeTime.toFixed(2)}ms`, "info");
+        const youtubeTime = perfMeasurement.end("youtube_search");
+        apiLog(`YouTube search took ${youtubeTime.toFixed(2)}ms`, "info");
         
         // Test Spotify search performance
-        log("Measuring Spotify search performance...", "info");
-        performance.start("spotify_search");
+        apiLog("Measuring Spotify search performance...", "info");
+        perfMeasurement.start("spotify_search");
         await searchSpotify(config.testQueries.spotifySong);
-        const spotifyTime = performance.end("spotify_search");
-        log(`Spotify search took ${spotifyTime.toFixed(2)}ms`, "info");
+        const spotifyTime = perfMeasurement.end("spotify_search");
+        apiLog(`Spotify search took ${spotifyTime.toFixed(2)}ms`, "info");
         
         // Test lyrics search performance
-        log("Measuring lyrics search performance...", "info");
-        performance.start("lyrics_search");
+        apiLog("Measuring lyrics search performance...", "info");
+        perfMeasurement.start("lyrics_search");
         await searchByLyrics(config.testQueries.lyrics);
-        const lyricsTime = performance.end("lyrics_search");
-        log(`Lyrics search took ${lyricsTime.toFixed(2)}ms`, "info");
+        const lyricsTime = perfMeasurement.end("lyrics_search");
+        apiLog(`Lyrics search took ${lyricsTime.toFixed(2)}ms`, "info");
         
         // Assert reasonable performance
         assert(youtubeTime < 5000, "YouTube search completes in under 5 seconds");
@@ -330,7 +330,7 @@ const testCategories = {
         
         return true;
       } catch (error) {
-        log(`Error in performance testing: ${error.message}`, "error");
+        apiLog(`Error in performance testing: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -340,12 +340,12 @@ const testCategories = {
   // 7. UI Integration Testing
   uiIntegration: [
     async () => {
-      log("Testing API integration with UI components", "step");
+      apiLog("Testing API integration with UI components", "step");
       
       try {
         // Check if we're in a browser environment with DOM
         if (typeof document === 'undefined') {
-          log("Not in browser environment, skipping UI integration tests", "warning");
+          apiLog("Not in browser environment, skipping UI integration tests", "warning");
           return true;
         }
         
@@ -354,7 +354,7 @@ const testCategories = {
         assert(searchBox !== null || searchBox !== undefined, "Search box exists in the UI");
         
         if (searchBox) {
-          log("Found search box in the UI", "success");
+          apiLog("Found search box in the UI", "success");
           
           // Test search results integration
           const searchResults = document.querySelector('.search-results') ||
@@ -362,9 +362,9 @@ const testCategories = {
                                document.querySelector('[class*="searchResults"]');
           
           if (searchResults) {
-            log("Found search results container in the UI", "success");
+            apiLog("Found search results container in the UI", "success");
           } else {
-            log("Search results container not found in the UI", "warning");
+            apiLog("Search results container not found in the UI", "warning");
           }
           
           // Test player integration
@@ -373,15 +373,15 @@ const testCategories = {
                         document.querySelector('[class*="player"]');
           
           if (player) {
-            log("Found audio player in the UI", "success");
+            apiLog("Found audio player in the UI", "success");
           } else {
-            log("Audio player not found in the UI", "warning");
+            apiLog("Audio player not found in the UI", "warning");
           }
         }
         
         return true;
       } catch (error) {
-        log(`Error in UI integration testing: ${error.message}`, "error");
+        apiLog(`Error in UI integration testing: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -392,36 +392,36 @@ const testCategories = {
   comprehensiveApiTesting: [
     async () => {
       if (!config.testAllEndpoints) {
-        log("Comprehensive API testing disabled, skipping", "info");
+        apiLog("Comprehensive API testing disabled, skipping", "info");
         return true;
       }
       
-      log("Running comprehensive API endpoint testing", "step");
+      apiLog("Running comprehensive API endpoint testing", "step");
       
       try {
         // Test all YouTube search variations
-        log("Testing multiple YouTube search queries...", "info");
+        apiLog("Testing multiple YouTube search queries...", "info");
         const queries = ["Despacito", "Shape of You", "Gangnam Style", "Billie Jean"];
         
         for (const query of queries) {
-          log(`Testing YouTube search for "${query}"...`, "info");
+          apiLog(`Testing YouTube search for "${query}"...`, "info");
           const results = await searchTracks(query);
           assert(results !== null, `YouTube search for "${query}" returned results`);
           assert(results.mainResult !== undefined, `YouTube search for "${query}" returned a main result`);
         }
         
         // Test all Spotify search variations
-        log("Testing multiple Spotify search queries...", "info");
+        apiLog("Testing multiple Spotify search queries...", "info");
         const spotifyQueries = ["Ed Sheeran", "Taylor Swift", "The Weeknd", "Drake"];
         
         for (const query of spotifyQueries) {
-          log(`Testing Spotify search for "${query}"...`, "info");
+          apiLog(`Testing Spotify search for "${query}"...`, "info");
           const results = await searchSpotify(query);
           assert(results !== null, `Spotify search for "${query}" returned results`);
         }
         
         // Test various lyrics snippets
-        log("Testing multiple lyrics search queries...", "info");
+        apiLog("Testing multiple lyrics search queries...", "info");
         const lyricsSnippets = [
           "I'm in love with the shape of you",
           "Hello from the other side",
@@ -430,14 +430,14 @@ const testCategories = {
         ];
         
         for (const lyrics of lyricsSnippets) {
-          log(`Testing lyrics search for "${lyrics}"...`, "info");
+          apiLog(`Testing lyrics search for "${lyrics}"...`, "info");
           const results = await searchByLyrics(lyrics);
           assert(results !== null, `Lyrics search for "${lyrics}" returned results`);
         }
         
         return true;
       } catch (error) {
-        log(`Error in comprehensive API testing: ${error.message}`, "error");
+        apiLog(`Error in comprehensive API testing: ${error.message}`, "error");
         console.error(error);
         return false;
       }
@@ -447,7 +447,7 @@ const testCategories = {
 
 // Main test runner
 const runAPITests = async () => {
-  log("Starting API integration tests", "info");
+  apiLog("Starting API integration tests", "info");
   testState.startTime = new Date();
   testState.step = 0;
   testState.passed = 0;
@@ -455,24 +455,25 @@ const runAPITests = async () => {
   
   // Start overall performance measurement
   if (config.measurePerformance) {
-    performance.start("total_test_time");
+    perfMeasurement.start("total_test_time");
   }
   
   // Make API functions available globally for testing
   if (!window.apiService) {
-    log("API service not found in window object. Importing from module...", "warning");
+    apiLog("API service not found in window object. Importing from module...", "warning");
     
     try {
-      // Try to import the API service
-      const apiModule = await import('/src/services/apiService.ts');
+      // Try to import the API service using relative path
+      const apiModule = await import('../services/apiService.ts');
       window.apiService = apiModule;
-      log("Successfully imported API service", "success");
+      apiLog("Successfully imported API service", "success");
     } catch (error) {
-      log(`Failed to import API service: ${error.message}`, "error");
-      log("Please run this test from the application where API service is available", "warning");
+      apiLog(`Failed to import API service: ${error.message}`, "error");
+      apiLog("Please run this test from the application where API service is available", "warning");
       return {
         status: "failed",
-        error: "API service not available"
+        passed: 0,
+        failed: 1
       };
     }
   }
@@ -486,11 +487,11 @@ const runAPITests = async () => {
       try {
         const result = await test();
         if (!result) {
-          log(`Test in category ${category} failed, continuing with next category`, "warning");
+          apiLog(`Test in category ${category} failed, continuing with next category`, "warning");
           break;
         }
       } catch (error) {
-        log(`Error in test category ${category}: ${error.message}`, "error");
+        apiLog(`Error in test category ${category}: ${error.message}`, "error");
         console.error(error);
         testState.failed++;
         break;
@@ -503,27 +504,27 @@ const runAPITests = async () => {
   testState.endTime = new Date();
   const duration = (testState.endTime - testState.startTime) / 1000;
   
-  log("\n-----------------------------------", "info");
-  log(`API Integration Test Results:`, "info");
-  log(`Total Steps: ${testState.step}`, "info");
-  log(`Passed Assertions: ${testState.passed}`, "success");
-  log(`Failed Assertions: ${testState.failed}`, "error");
-  log(`Duration: ${duration.toFixed(2)} seconds`, "info");
-  log(`Status: ${testState.failed === 0 ? "PASSED" : "FAILED"}`, testState.failed === 0 ? "success" : "error");
+  apiLog("\n-----------------------------------", "info");
+  apiLog(`API Integration Test Results:`, "info");
+  apiLog(`Total Steps: ${testState.step}`, "info");
+  apiLog(`Passed Assertions: ${testState.passed}`, "success");
+  apiLog(`Failed Assertions: ${testState.failed}`, "error");
+  apiLog(`Duration: ${duration.toFixed(2)} seconds`, "info");
+  apiLog(`Status: ${testState.failed === 0 ? "PASSED" : "FAILED"}`, testState.failed === 0 ? "success" : "error");
   
   // Add performance report if enabled
   if (config.measurePerformance) {
-    performance.end("total_test_time");
-    const perfReport = performance.getReport();
+    perfMeasurement.end("total_test_time");
+    const perfReport = perfMeasurement.getReport();
     
-    log("-----------------------------------", "info");
-    log("Performance Report:", "info");
+    apiLog("-----------------------------------", "info");
+    apiLog("Performance Report:", "info");
     for (const [label, duration] of Object.entries(perfReport)) {
-      log(`${label}: ${duration}`, "info");
+      apiLog(`${label}: ${duration}`, "info");
     }
   }
   
-  log("-----------------------------------", "info");
+  apiLog("-----------------------------------", "info");
   
   return {
     status: testState.failed === 0 ? "passed" : "failed",
@@ -535,8 +536,9 @@ const runAPITests = async () => {
 };
 
 // Instructions for running the test
-log("To run the API integration tests, call the runAPITests() function in the console", "info");
-log("Example: runAPITests().then(results => console.log(results))", "info");
+apiLog("To run the API integration tests, call the runAPITests() function in the console", "info");
+apiLog("Example: runAPITests().then(results => console.log(results))", "info");
 
 // Export the test runner
+window.runAPITests = runAPITests;
 window.runAPITests = runAPITests;
