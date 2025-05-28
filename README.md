@@ -74,12 +74,11 @@ npm run build:server
 
 ## 🌐 Deployment
 
-### Fly.io (Recommended)
+### GitHub Actions (Recommended)
 
-1. **Quick Deploy**:
-   ```bash
-   ./deploy.sh
-   ```
+1. **Automatic Deployment**:
+   - Push to GitHub and deploy automatically
+   - See [`GITHUB_DEPLOYMENT.md`](GITHUB_DEPLOYMENT.md) for setup
 
 2. **Manual Deployment**:
    ```bash
@@ -93,20 +92,26 @@ npm run build:server
    fly deploy
    ```
 
-3. **Using npm scripts**:
+3. **Quick Deploy Script**:
+   ```bash
+   ./deploy.sh
+   ```
+
+4. **Using npm scripts**:
    ```bash
    npm run deploy        # Deploy to Fly.io
    npm run deploy:logs   # View deployment logs
    npm run deploy:status # Check deployment status
    ```
 
-See [`FLY_DEPLOYMENT.md`](FLY_DEPLOYMENT.md) for detailed deployment instructions.
+See [`GITHUB_DEPLOYMENT.md`](GITHUB_DEPLOYMENT.md) for GitHub Actions setup or [`FLY_DEPLOYMENT.md`](FLY_DEPLOYMENT.md) for manual deployment.
 
 ## 📚 Documentation
 
 - **[Developer Guide](DEVELOPER_GUIDE.md)** - Complete code explanation and customization
 - **[Payload System](PAYLOAD_EXPLANATION.md)** - Mining system technical details
-- **[Deployment Guide](FLY_DEPLOYMENT.md)** - Step-by-step deployment instructions
+- **[GitHub Deployment Guide](GITHUB_DEPLOYMENT.md)** - Automatic deployment via GitHub Actions
+- **[Manual Deployment Guide](FLY_DEPLOYMENT.md)** - Step-by-step manual deployment instructions
 
 ## ⚙️ Configuration
 

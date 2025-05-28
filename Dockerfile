@@ -10,12 +10,14 @@ WORKDIR /app
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
 COPY client/package.json client/package-lock.json* ./client/
+COPY shared/ ./shared/
 RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/shared ./shared
 COPY . .
 
 # Install client dependencies and build
@@ -23,9 +25,9 @@ WORKDIR /app/client
 RUN npm ci
 RUN npm run build
 
-# Build server
+# Copy server files
 WORKDIR /app
-RUN npm run build:server
+COPY server/prod-server.js ./server/
 
 # Production image, copy all the files and run the app
 FROM base AS runner
@@ -37,7 +39,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
-COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/server/prod-server.js ./server/
 COPY --from=builder /app/client/dist ./client/dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
@@ -49,4 +51,4 @@ EXPOSE 5000
 ENV PORT=5000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server/dist/index.js"]
+CMD ["node", "server/prod-server.js"]

@@ -1,7 +1,7 @@
 # fly.toml app configuration file generated for soundgrab on 2025-05-28T20:39:32Z
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 
-app = "soundgrab"
+app = "soundgrab-mvp"
 primary_region = "iad"
 
 [build]
