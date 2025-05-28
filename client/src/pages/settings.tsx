@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -33,12 +33,27 @@ export default function SettingsPage() {
   });
 
   const handleSaveSettings = () => {
-    // In a real implementation, this would save to localStorage or an API
+    // Save settings to localStorage
+    localStorage.setItem('soundgrab_settings', JSON.stringify(settings));
+    
     toast({
       title: "Settings Saved",
       description: "Your preferences have been updated successfully.",
     });
   };
+  
+  // Load settings from localStorage on component mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('soundgrab_settings');
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(parsedSettings);
+      } catch (error) {
+        console.error('Failed to parse saved settings:', error);
+      }
+    }
+  }, []);
 
   const handleClearHistory = () => {
     // In a real implementation, this would clear history from storage

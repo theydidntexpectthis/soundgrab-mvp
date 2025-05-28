@@ -8,7 +8,7 @@ import {
 } from "./mockData";
 
 // Flag to toggle between mock data and real API
-const USE_MOCK_DATA = true; // Set to false when API is ready
+const USE_MOCK_DATA = false; // Using real API connections
 
 /**
  * Search for tracks by query

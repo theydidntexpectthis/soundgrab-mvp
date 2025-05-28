@@ -35,40 +35,58 @@ export function PlayerBar() {
       const audioSrc =
         currentTrack.previewUrl ||
         currentTrack.audioUrl ||
-        `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.wav`;
+        `/api/downloads/files/${currentTrack.artist.replace(/\s+/g, "_").toLowerCase()}-${currentTrack.title.replace(/\s+/g, "_").toLowerCase()}.mp3`;
 
-      audio.src = audioSrc;
+      // Ensure the audio source is valid
+      const validAudioSrc = audioSrc || `https://www.soundjay.com/misc/sounds/bell-ringing-01.wav`;
+
+      audio.src = validAudioSrc;
       audio.volume = volume;
       audio.muted = isMuted;
       audio.crossOrigin = "anonymous"; // Enable CORS for external audio
+      audio.preload = "auto"; // Preload audio data
 
       console.log(
         "Setting up audio for:",
         currentTrack.title,
         "with URL:",
-        audioSrc,
+        validAudioSrc,
       );
 
       if (isPlaying) {
-        // Add a small delay to ensure audio is loaded
-        setTimeout(() => {
-          audio.play().catch((error) => {
-            console.error("Failed to play audio:", error);
+        // Create a loading promise with timeout
+        const playWithTimeout = () => {
+          return Promise.race([
+            audio.play(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("Playback timeout")), 3000)
+            )
+          ]);
+        };
+
+        // Try to play the audio
+        playWithTimeout().catch((error) => {
+          console.error("Failed to play audio:", error);
+          toast({
+            title: "Playback Error",
+            description: "Could not play this track. Trying alternative source...",
+            variant: "destructive",
+          });
+
+          // Try an alternative source
+          const alternativeSource = `https://www.soundjay.com/misc/sounds/bell-ringing-0${Math.floor(Math.random() * 5) + 1}.wav`;
+          audio.src = alternativeSource;
+          
+          // Try to play again
+          audio.play().catch((err) => {
+            console.error("Alternative audio also failed:", err);
             toast({
-              title: "Playback Error",
-              description:
-                "Could not play this track. Using demo audio instead.",
+              title: "Playback Failed",
+              description: "Could not play audio from any source. Please try another track.",
               variant: "destructive",
             });
-
-            // Fallback to a working demo audio
-            audio.src =
-              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
-            audio
-              .play()
-              .catch((err) => console.error("Demo audio also failed:", err));
           });
-        }, 100);
+        });
       } else {
         audio.pause();
       }

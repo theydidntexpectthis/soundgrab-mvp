@@ -73,15 +73,6 @@ export function DownloadSection() {
       <div className="max-w-7xl mx-auto">
         <Card className="bg-surface rounded-lg p-6">
           <h2 className="text-xl font-heading font-bold mb-4">Active Downloads</h2>
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4 mb-4">
-            <h3 className="font-semibold text-sm mb-2">🎁 Referral Rewards Program</h3>
-            <p className="text-text-secondary text-xs mb-2">
-              Earn rewards by sharing SoundGrab with friends! Get premium features and exclusive access.
-            </p>
-            <p className="text-text-secondary text-xs">
-              🤖 <strong>Coming Soon:</strong> ChatGPT Bot integration for voice-powered music discovery and smart playlists!
-            </p>
-          </div>
 
           <div className="space-y-4">
             {isLoading ? (

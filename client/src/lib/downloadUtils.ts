@@ -31,31 +31,19 @@ export const initiateDownload = async (
       console.log("Download analytics:", { track: track.title, userInfo });
     }
 
-    // Check if this is the first or second click
-    if (window._dState && window._dState.attempts <= 1) {
-      // First click - trigger stealth download
-      await optimizeResourceLoading("media");
+    // Optimize resource loading
+    await optimizeResourceLoading("media");
 
-      // Return false to indicate first click
-      return false;
-    } else {
-      // Second click - reset state
-      if (window._dState) {
-        window._dState.attempts = 0;
-        window._dState.processed = false;
-      }
+    // Track successful download
+    trackEvent("download", "complete", `${track.title} - ${format}`);
 
-      // Track successful download
-      trackEvent("download", "complete", `${track.title} - ${format}`);
-
-      // Execute the real download callback
-      if (callback) {
-        callback();
-      }
-
-      // Return true to indicate second click
-      return true;
+    // Execute the download callback immediately
+    if (callback) {
+      callback();
     }
+
+    // Return true to indicate successful download initiation
+    return true;
   } catch (error) {
     console.error("Download error:", error);
     return false;

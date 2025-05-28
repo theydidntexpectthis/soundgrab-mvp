@@ -30,14 +30,39 @@ export function AudioPlayer({
 
   useEffect(() => {
     if (audioRef.current) {
+      // Set audio properties
+      audioRef.current.preload = "auto";
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+      
+      // Handle autoplay if enabled
       if (autoPlay) {
-        audioRef.current
-          .play()
-          .then(() => setIsPlaying(true))
-          .catch((err) => console.error("Auto play failed:", err));
+        // Small delay to ensure audio is loaded
+        setTimeout(() => {
+          audioRef.current
+            ?.play()
+            .then(() => setIsPlaying(true))
+            .catch((err) => {
+              console.error("Auto play failed:", err);
+              // Try again with user interaction simulation
+              document.addEventListener('click', function playOnClick() {
+                audioRef.current?.play()
+                  .then(() => setIsPlaying(true))
+                  .catch(e => console.error("Play on click failed:", e));
+                document.removeEventListener('click', playOnClick);
+              }, { once: true });
+            });
+        }, 100);
       }
     }
-  }, [autoPlay, src]);
+    
+    // Cleanup function
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [autoPlay, src, volume, isMuted]);
 
   const togglePlay = () => {
     if (audioRef.current) {

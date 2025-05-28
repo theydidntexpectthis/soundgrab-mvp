@@ -33,7 +33,7 @@ export default function LyricsSearchPage() {
           {/* Tips and guide */}
           <div className="mt-6 p-4 bg-surface rounded-lg">
             <h3 className="text-lg font-medium mb-2">How it works</h3>
-            <p className="text-text-secondary text-sm mb-3">
+            <p className="text-text-primary text-sm mb-3 font-medium">
               Our lyrics search uses AI to find songs that match the lyrics you
               enter. The more accurate the lyrics, the better the results.
             </p>
@@ -51,7 +51,7 @@ export default function LyricsSearchPage() {
                 <button
                   key={index}
                   onClick={() => handleSearch(example)}
-                  className="block w-full text-left p-2 text-sm bg-surface-light hover:bg-primary/10 rounded-md text-text-primary transition-colors"
+                  className="block w-full text-left p-2 text-sm bg-surface-light hover:bg-primary/10 rounded-md text-text-primary font-medium transition-colors"
                 >
                   "{example}"
                 </button>
