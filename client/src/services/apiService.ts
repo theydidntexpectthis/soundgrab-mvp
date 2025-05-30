@@ -23,11 +23,14 @@ const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "d42dbed423mshd69f2721
 console.log('🔧 API Configuration Debug:');
 console.log('- Environment Mode:', import.meta.env.MODE);
 console.log('- Raw VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('- Raw VITE_USE_EXTERNAL_APIS:', import.meta.env.VITE_USE_EXTERNAL_APIS);
+console.log('- Raw VITE_RAPIDAPI_KEY:', import.meta.env.VITE_RAPIDAPI_KEY ? 'Set (length: ' + import.meta.env.VITE_RAPIDAPI_KEY.length + ')' : 'NOT SET');
 console.log('- Computed API_BASE_URL:', API_BASE_URL);
 console.log('- Current Origin:', typeof window !== 'undefined' ? window.location.origin : 'N/A (server)');
 console.log('- USE_MOCK_DATA:', USE_MOCK_DATA);
 console.log('- USE_EXTERNAL_APIS:', USE_EXTERNAL_APIS);
-console.log('- RAPIDAPI_KEY:', RAPIDAPI_KEY ? 'Set' : 'Not set');
+console.log('- RAPIDAPI_KEY (computed):', RAPIDAPI_KEY ? 'Set (length: ' + RAPIDAPI_KEY.length + ', first 10: ' + RAPIDAPI_KEY.substring(0, 10) + '...)' : 'Not set');
+console.log('- All env vars:', Object.keys(import.meta.env).filter(key => key.startsWith('VITE_')));
 
 // Log potential integration issues
 if (import.meta.env.MODE === 'production' && API_BASE_URL.includes('localhost')) {
@@ -64,16 +67,32 @@ async function rapidApiRequest(host: string, endpoint: string, params: Record<st
     }
   };
   
+  // Enhanced diagnostic logging
+  console.log('🔍 RapidAPI Request Diagnostics:');
+  console.log('- URL:', url.toString());
+  console.log('- Host:', host);
+  console.log('- Endpoint:', endpoint);
+  console.log('- Params:', params);
+  console.log('- API Key (first 10 chars):', RAPIDAPI_KEY ? RAPIDAPI_KEY.substring(0, 10) + '...' : 'NOT SET');
+  console.log('- Headers:', options.headers);
+  
   try {
     const response = await fetch(url.toString(), options);
     
+    console.log('📡 RapidAPI Response Status:', response.status);
+    console.log('📡 RapidAPI Response Headers:', Object.fromEntries(response.headers.entries()));
+    
     if (!response.ok) {
-      throw new Error(`RapidAPI request failed with status ${response.status}`);
+      const errorText = await response.text();
+      console.error('❌ RapidAPI Error Response Body:', errorText);
+      throw new Error(`RapidAPI request failed with status ${response.status}: ${errorText}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log('✅ RapidAPI Success Response:', JSON.stringify(data, null, 2));
+    return data;
   } catch (error) {
-    console.error('RapidAPI request failed:', error);
+    console.error('❌ RapidAPI request failed:', error);
     throw error;
   }
 }

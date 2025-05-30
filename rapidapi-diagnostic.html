@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidAPI Diagnostic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 RapidAPI Diagnostic Test</h1>
+        <p>This tool tests the RapidAPI integration for SoundGrab to identify configuration issues.</p>
+        
+        <div class="test-section info">
+            <h3>📋 Test Configuration</h3>
+            <div id="config-info">Loading configuration...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Available Tests</h3>
+            <button onclick="testApiKeyValidation()">Test API Key Validation</button>
+            <button onclick="testYouTubeSearch()">Test YouTube Search API</button>
+            <button onclick="testSpotifySearch()">Test Spotify Search API</button>
+            <button onclick="testLyricsSearch()">Test Lyrics Search API</button>
+            <button onclick="testAllApis()">Run All Tests</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Test Results</h3>
+            <div id="test-results">
+                <p>Click a test button to start testing...</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Detailed Logs</h3>
+            <div id="detailed-logs"></div>
+        </div>
+    </div>
+
+    <script>
+        // RapidAPI Configuration
+        const RAPIDAPI_KEY = "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
+        const RAPIDAPI_HOSTS = {
+            youtube_search: "youtube-search-and-download.p.rapidapi.com",
+            youtube_download: "youtube-mp3-audio-video-downloader.p.rapidapi.com",
+            spotify: "spotify23.p.rapidapi.com",
+            lyrics: "genius-song-lyrics1.p.rapidapi.com",
+            spotify_downloader: "spotify-downloader9.p.rapidapi.com"
+        };
+
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            total: 0
+        };
+
+        // Utility functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            const logsContainer = document.getElementById('detailed-logs');
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateResults(testName, passed, details = '') {
+            testResults.total++;
+            if (passed) {
+                testResults.passed++;
+                log(`✅ ${testName}: PASSED ${details}`, 'success');
+            } else {
+                testResults.failed++;
+                log(`❌ ${testName}: FAILED ${details}`, 'error');
+            }
+            
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = `
+                <div class="success">✅ Passed: ${testResults.passed}</div>
+                <div class="error">❌ Failed: ${testResults.failed}</div>
+                <div class="info">📊 Total: ${testResults.total}</div>
+            `;
+        }
+
+        function clearLogs() {
+            document.getElementById('detailed-logs').innerHTML = '';
+            document.getElementById('test-results').innerHTML = '<p>Logs cleared. Click a test button to start testing...</p>';
+            testResults = { passed: 0, failed: 0, total: 0 };
+        }
+
+        // RapidAPI request function
+        async function rapidApiRequest(host, endpoint, params = {}) {
+            const url = new URL(`https://${host}${endpoint}`);
+            
+            Object.entries(params).forEach(([key, value]) => {
+                url.searchParams.append(key, value);
+            });
+            
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': RAPIDAPI_KEY,
+                    'X-RapidAPI-Host': host
+                }
+            };
+            
+            log(`🔍 Making request to: ${url.toString()}`);
+            log(`📡 Headers: ${JSON.stringify(options.headers, null, 2)}`);
+            
+            try {
+                const response = await fetch(url.toString(), options);
+                
+                log(`📊 Response Status: ${response.status} ${response.statusText}`);
+                log(`📊 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Error Response Body: ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                log(`✅ Success Response: ${JSON.stringify(data, null, 2)}`);
+                return data;
+            } catch (error) {
+                log(`❌ Request failed: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Test functions
+        async function testApiKeyValidation() {
+            log('🔑 Testing API Key Validation...');
+            
+            try {
+                // Test with a simple endpoint that should respond quickly
+                const response = await rapidApiRequest(
+                    RAPIDAPI_HOSTS.youtube_search,
+                    '/search',
+                    { query: 'test', limit: '1' }
+                );
+                
+                updateResults('API Key Validation', true, '- Key is valid and working');
+                return true;
+            } catch (error) {
+                if (error.message.includes('401') || error.message.includes('403')) {
+                    updateResults('API Key Validation', false, '- Invalid or expired API key');
+                } else if (error.message.includes('429')) {
+                    updateResults('API Key Validation', false, '- Rate limit exceeded');
+                } else {
+                    updateResults('API Key Validation', false, `- ${error.message}`);
+                }
+                return false;
+            }
+        }
+
+        async function testYouTubeSearch() {
+            log('🎵 Testing YouTube Search API...');
+            
+            try {
+                const response = await rapidApiRequest(
+                    RAPIDAPI_HOSTS.youtube_search,
+                    '/search',
+                    { 
+                        query: 'Never Gonna Give You Up',
+                        type: 'video',
+                        limit: '5'
+                    }
+                );
+                
+                if (response && (response.contents || response.videos || response.items)) {
+                    updateResults('YouTube Search', true, '- Search returned valid results');
+                    return true;
+                } else {
+                    updateResults('YouTube Search', false, '- Unexpected response format');
+                    return false;
+                }
+            } catch (error) {
+                updateResults('YouTube Search', false, `- ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testSpotifySearch() {
+            log('🎧 Testing Spotify Search API...');
+            
+            try {
+                const response = await rapidApiRequest(
+                    RAPIDAPI_HOSTS.spotify,
+                    '/search',
+                    { 
+                        q: 'Never Gonna Give You Up',
+                        type: 'track',
+                        limit: '5'
+                    }
+                );
+                
+                if (response && response.tracks && response.tracks.items) {
+                    updateResults('Spotify Search', true, '- Search returned valid results');
+                    return true;
+                } else {
+                    updateResults('Spotify Search', false, '- Unexpected response format');
+                    return false;
+                }
+            } catch (error) {
+                updateResults('Spotify Search', false, `- ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testLyricsSearch() {
+            log('📝 Testing Lyrics Search API...');
+            
+            try {
+                // Try different possible endpoints
+                let response;
+                try {
+                    response = await rapidApiRequest(
+                        RAPIDAPI_HOSTS.lyrics,
+                        '/search',
+                        { q: 'Never Gonna Give You Up' }
+                    );
+                } catch (error) {
+                    log('❌ /search endpoint failed, trying /songs/search');
+                    response = await rapidApiRequest(
+                        RAPIDAPI_HOSTS.lyrics,
+                        '/songs/search',
+                        { q: 'Never Gonna Give You Up' }
+                    );
+                }
+                
+                if (response && response.hits && response.hits.length > 0) {
+                    updateResults('Lyrics Search', true, '- Search returned valid results');
+                    return true;
+                } else {
+                    updateResults('Lyrics Search', false, '- No lyrics results found');
+                    return false;
+                }
+            } catch (error) {
+                updateResults('Lyrics Search', false, `- ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testAllApis() {
+            log('🚀 Running all API tests...');
+            clearLogs();
+            
+            const tests = [
+                testApiKeyValidation,
+                testYouTubeSearch,
+                testSpotifySearch,
+                testLyricsSearch
+            ];
+            
+            for (const test of tests) {
+                try {
+                    await test();
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between tests
+                } catch (error) {
+                    log(`❌ Test failed: ${error.message}`, 'error');
+                }
+            }
+            
+            log(`🏁 All tests completed. Passed: ${testResults.passed}, Failed: ${testResults.failed}`);
+        }
+
+        // Initialize page
+        function initializePage() {
+            const configDiv = document.getElementById('config-info');
+            configDiv.innerHTML = `
+                <strong>API Key:</strong> ${RAPIDAPI_KEY ? RAPIDAPI_KEY.substring(0, 10) + '...' : 'NOT SET'}<br>
+                <strong>Configured Hosts:</strong><br>
+                ${Object.entries(RAPIDAPI_HOSTS).map(([key, host]) => `• ${key}: ${host}`).join('<br>')}
+            `;
+            
+            log('🔧 RapidAPI Diagnostic Tool initialized');
+            log(`🔑 API Key: ${RAPIDAPI_KEY ? 'Set (length: ' + RAPIDAPI_KEY.length + ')' : 'NOT SET'}`);
+            log(`🌐 Configured ${Object.keys(RAPIDAPI_HOSTS).length} API hosts`);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
