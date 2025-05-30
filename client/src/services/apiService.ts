@@ -25,9 +25,12 @@ console.log('- USE_MOCK_DATA:', USE_MOCK_DATA);
 console.log('- API_BASE_URL:', API_BASE_URL);
 console.log('- USE_EXTERNAL_APIS:', USE_EXTERNAL_APIS);
 console.log('- RAPIDAPI_KEY:', RAPIDAPI_KEY ? 'Set' : 'Not set');
-const RAPIDAPI_HOST_YT = "youtube-search-and-download.p.rapidapi.com";
-const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com";
-const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com";
+// Updated RapidAPI hosts based on your actual subscriptions
+const RAPIDAPI_HOST_YT_SEARCH = "youtube-search-and-download.p.rapidapi.com"; // For search
+const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-to-mp315.p.rapidapi.com"; // YouTube to mp3 by Rapid87
+const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com"; // Spotify Data API by Glavier
+const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com"; // Genius - Song Lyrics by Glavier
+const RAPIDAPI_HOST_SPOTIFY_DOWNLOADER = "spotify-downloader9.p.rapidapi.com"; // Spotify Downloader
 
 /**
  * Make a request to RapidAPI
@@ -95,33 +98,14 @@ export async function searchTracks(
     return searchByVideoId(videoId);
   }
 
-  try {
-    // Always use our backend API for consistency
-    const apiUrl = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`;
-    console.log('🔍 Attempting API search:', apiUrl);
-    
-    const response = await apiRequest(
-      "GET",
-      apiUrl,
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to search for tracks");
-    }
-
-    const result = await response.json();
-    console.log('✅ API search successful:', result);
-    return result;
-  } catch (error) {
-    console.error("❌ Failed to search tracks:", error);
-    
-    // If external APIs are enabled and backend fails, try RapidAPI as fallback
-    if (USE_EXTERNAL_APIS) {
+  // Skip backend scraping entirely and use RapidAPI directly for better reliability
+  if (USE_EXTERNAL_APIS) {
+    console.log('🔍 Using RapidAPI directly for search:', query);
       try {
         console.log("Trying RapidAPI fallback for query:", query);
         
         const ytData = await rapidApiRequest(
-          RAPIDAPI_HOST_YT,
+          RAPIDAPI_HOST_YT_SEARCH,
           '/search',
           {
             query: query,
@@ -177,7 +161,6 @@ export async function searchTracks(
         console.log("Using mock data as final fallback");
         return mockSearchResults;
       }
-    }
     
     // Return mock data as fallback if external APIs are disabled
     console.log("Using mock data as fallback");
@@ -215,7 +198,7 @@ export async function searchByVideoId(videoId: string): Promise<SearchResult> {
   if (USE_EXTERNAL_APIS) {
     try {
       const videoData = await rapidApiRequest(
-        RAPIDAPI_HOST_YT,
+        RAPIDAPI_HOST_YT_SEARCH,
         '/video/info',
         { id: videoId }
       );
@@ -294,34 +277,42 @@ export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
     };
   }
 
-  try {
-    // Use our backend API first
-    const response = await apiRequest(
-      "GET",
-      `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`,
-    );
-
-    if (response.ok) {
-      return response.json();
-    }
-  } catch (error) {
-    console.error("Backend lyrics search failed:", error);
-  }
-
-  // Fallback to external API if enabled
+  // Skip backend for lyrics search since /api/search/lyrics endpoint doesn't exist
+  // Go directly to RapidAPI for lyrics search
   if (USE_EXTERNAL_APIS) {
+    console.log('🎵 Using RapidAPI for lyrics search:', lyrics);
     try {
-      const lyricsData = await rapidApiRequest(
-        RAPIDAPI_HOST_LYRICS,
-        '/search',
-        { q: lyrics }
-      );
+      console.log('🎵 Searching Genius API for lyrics:', lyrics);
+      
+      // Try different possible endpoints for Genius API by Glavier
+      let lyricsData;
+      try {
+        // First try /search endpoint
+        lyricsData = await rapidApiRequest(
+          RAPIDAPI_HOST_LYRICS,
+          '/search',
+          { q: lyrics }
+        );
+      } catch (error) {
+        console.log('❌ /search endpoint failed, trying /songs/search');
+        // Try alternative endpoint
+        lyricsData = await rapidApiRequest(
+          RAPIDAPI_HOST_LYRICS,
+          '/songs/search',
+          { q: lyrics }
+        );
+      }
+
+      console.log('🎵 Genius API response:', lyricsData);
 
       if (!lyricsData || !lyricsData.hits || !lyricsData.hits.length) {
+        console.log('❌ No lyrics results found in Genius response');
         throw new Error("No lyrics results found");
       }
 
       const topResult = lyricsData.hits[0].result;
+      console.log('🎵 Found song:', topResult.title, 'by', topResult.primary_artist.name);
+      
       const songQuery = `${topResult.title} ${topResult.primary_artist.name}`;
       const ytResults = await searchTracks(songQuery);
       
@@ -354,11 +345,11 @@ export async function searchSpotify(query: string): Promise<SearchResult> {
   }
   
   try {
-    // Search Spotify via RapidAPI
+    // Search Spotify via RapidAPI (Spotify Data API by Glavier)
     const spotifyData = await rapidApiRequest(
       RAPIDAPI_HOST_SPOTIFY,
-      '/search/',
-      { q: query, type: 'tracks', limit: '10' }
+      '/search',
+      { q: query, type: 'track', limit: '10' }
     );
     
     if (!spotifyData || !spotifyData.tracks || !spotifyData.tracks.items) {
@@ -437,6 +428,34 @@ export async function downloadTrack(
     return `/api/downloads/files/${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
   }
 
+  // Use YouTube to mp3 API by Rapid87 for actual downloads
+  if (USE_EXTERNAL_APIS && track.videoId) {
+    try {
+      console.log('🎵 Using YouTube to mp3 API for download:', track.videoId);
+      
+      const downloadData = await rapidApiRequest(
+        RAPIDAPI_HOST_YT_DOWNLOAD,
+        '/dl',
+        {
+          id: track.videoId,
+          format: format === 'mp3' ? 'mp3' : 'mp4'
+        }
+      );
+
+      console.log('🎵 Download API response:', downloadData);
+
+      if (downloadData && downloadData.link) {
+        return downloadData.link;
+      } else {
+        throw new Error("No download link received");
+      }
+    } catch (error) {
+      console.error("❌ YouTube to mp3 API failed:", error);
+      // Fall back to backend
+    }
+  }
+
+  // Fallback to backend API
   const response = await apiRequest("POST", "/api/downloads", {
     videoId: track.videoId,
     format,

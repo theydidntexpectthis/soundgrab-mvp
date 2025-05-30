@@ -38,7 +38,7 @@ export function LyricsSearchBox({
 
             <Textarea
               placeholder="Enter lyrics here... (e.g. 'never gonna give you up, never gonna let you down')"
-              className="min-h-[120px] resize-y bg-surface-light"
+              className="min-h-[120px] resize-y bg-surface-light text-foreground placeholder:text-muted-foreground"
               value={lyrics}
               onChange={(e) => setLyrics(e.target.value)}
             />
