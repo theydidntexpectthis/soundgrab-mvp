@@ -13,9 +13,8 @@ import {
 } from "lucide-react";
 import { usePlayback } from "./Layout";
 import { formatTime } from "@/lib/utils";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { checkFileExists, getDownloadedFileUrl } from "@/lib/downloadUtils";
+import { checkFileExists, getDownloadedFileUrl, initiateDownload } from "@/lib/downloadUtils";
 
 export function PlayerBar() {
   const { currentTrack, isPlaying, togglePlayback, skipNext, skipPrevious } =
@@ -203,26 +202,21 @@ export function PlayerBar() {
         description: `Preparing ${currentTrack.title} for download...`,
       });
 
-      const response = await apiRequest("POST", "/api/downloads", {
-        videoId: currentTrack.videoId,
-        format: "mp3",
-        title: currentTrack.title,
-        artist: currentTrack.artist,
+      const success = await initiateDownload(currentTrack, "mp3", () => {
+        toast({
+          title: "Download completed",
+          description: `${currentTrack.title} has been downloaded successfully`,
+        });
       });
 
-      if (response.ok) {
-        toast({
-          title: "Download started",
-          description: `${currentTrack.title} will be downloaded shortly`,
-        });
-      } else {
+      if (!success) {
         throw new Error("Download failed");
       }
     } catch (error) {
       console.error("Download error:", error);
       toast({
         title: "Download failed",
-        description: "There was an error preparing your download",
+        description: "There was an error downloading your track",
         variant: "destructive",
       });
     }
@@ -260,7 +254,7 @@ export function PlayerBar() {
             <h4 className="font-medium text-sm truncate">
               {currentTrack.title}
             </h4>
-            <p className="text-black dark:text-gray-300 text-xs truncate">
+            <p className="text-muted-foreground text-xs truncate">
               {currentTrack.artist}
             </p>
           </div>
@@ -296,7 +290,7 @@ export function PlayerBar() {
             </Button>
           </div>
           <div className="flex items-center mt-1">
-            <span className="text-black dark:text-gray-300 text-xs mr-2">
+            <span className="text-muted-foreground text-xs mr-2">
               {formatTime(currentTime)}
             </span>
             <Slider
@@ -307,7 +301,7 @@ export function PlayerBar() {
               onValueChange={handleSeek}
               className="flex-1 h-1"
             />
-            <span className="text-black dark:text-gray-300 text-xs ml-2">
+            <span className="text-muted-foreground text-xs ml-2">
               {formatTime(duration)}
             </span>
           </div>

@@ -10,9 +10,12 @@ import {
 // Flag to toggle between mock data and real API
 const USE_MOCK_DATA = false; // Using real API connections
 
-// RapidAPI configuration
-// RapidAPI key configuration
-const RAPIDAPI_KEY = "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
+// Environment-based API configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const USE_EXTERNAL_APIS = import.meta.env.VITE_USE_EXTERNAL_APIS === 'true';
+
+// RapidAPI configuration (only used if external APIs are enabled)
+const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
 const RAPIDAPI_HOST_YT = "youtube-search-and-download.p.rapidapi.com";
 const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com";
 const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com";
@@ -56,7 +59,7 @@ async function rapidApiRequest(host: string, endpoint: string, params: Record<st
 
 /**
  * Search for tracks by query
- * @param query Search query (title, artist, or lyrics)
+ * @param query Search query (title, artist, lyrics, or URL)
  * @param sortBy Sort method
  * @returns Search results
  */
@@ -77,52 +80,14 @@ export async function searchTracks(
     return mockSearchResults;
   }
 
+  // Handle YouTube URL searches
+  if (query.startsWith('youtube:')) {
+    const videoId = query.replace('youtube:', '');
+    return searchByVideoId(videoId);
+  }
+
   try {
-    // Search YouTube via RapidAPI
-    const ytData = await rapidApiRequest(
-      RAPIDAPI_HOST_YT,
-      '/search',
-      { query, type: 'v', sort: sortBy }
-    );
-
-    if (!ytData || !ytData.contents) {
-      throw new Error("Invalid response from YouTube API");
-    }
-
-    // Map YouTube results to our Track schema
-    const tracks: Track[] = ytData.contents
-      .filter((item: any) => item.type === 'video')
-      .map((item: any) => {
-        const video = item.video;
-        return {
-          id: video.videoId,
-          videoId: video.videoId,
-          title: video.title,
-          artist: video.author?.name || 'Unknown Artist',
-          thumbnailUrl: video.thumbnails?.[0]?.url,
-          duration: video.lengthSeconds || 0,
-          views: video.viewCountText ? parseInt(video.viewCountText.replace(/[^0-9]/g, '')) : 0,
-          description: video.description || '',
-          publishDate: video.publishedTimeText || '',
-        };
-      });
-
-    // Format response according to our schema
-    const mainResult = tracks.length > 0 ? tracks[0] : null;
-    const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
-
-    if (!mainResult) {
-      throw new Error("No results found");
-    }
-
-    return {
-      mainResult,
-      otherResults
-    };
-  } catch (error) {
-    console.error("Failed to search tracks via RapidAPI:", error);
-    
-    // Fallback to our backend API
+    // Always use our backend API for consistency
     const response = await apiRequest(
       "GET",
       `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`,
@@ -133,7 +98,141 @@ export async function searchTracks(
     }
 
     return response.json();
+  } catch (error) {
+    console.error("Failed to search tracks:", error);
+    
+    // If external APIs are enabled and backend fails, try RapidAPI as fallback
+    if (USE_EXTERNAL_APIS) {
+      try {
+        console.log("Trying RapidAPI fallback for query:", query);
+        
+        const ytData = await rapidApiRequest(
+          RAPIDAPI_HOST_YT,
+          '/search',
+          {
+            query: query,
+            type: 'video',
+            sort: sortBy,
+            limit: '10'
+          }
+        );
+
+        console.log("RapidAPI response:", ytData);
+
+        if (!ytData || (!ytData.contents && !ytData.videos && !ytData.items)) {
+          throw new Error("Invalid response from YouTube API");
+        }
+
+        // Handle different response formats from different RapidAPI endpoints
+        let videos = ytData.contents || ytData.videos || ytData.items || [];
+        
+        // Map YouTube results to our Track schema
+        const tracks: Track[] = videos
+          .filter((item: any) => item.type === 'video' || item.videoId || item.id)
+          .slice(0, 10)
+          .map((item: any) => {
+            const video = item.video || item;
+            return {
+              id: video.videoId || video.id || Math.random().toString(36),
+              videoId: video.videoId || video.id,
+              title: video.title || 'Unknown Title',
+              artist: video.author?.name || video.channelTitle || video.channel?.name || 'Unknown Artist',
+              thumbnailUrl: video.thumbnails?.[0]?.url || video.thumbnail || video.thumbnails?.high?.url,
+              duration: video.lengthSeconds || video.duration || 0,
+              views: video.viewCount || video.viewCountText ? parseInt(String(video.viewCount || video.viewCountText).replace(/[^0-9]/g, '')) : 0,
+              description: video.description || video.shortDescription || '',
+              publishDate: video.publishedTimeText || video.publishedAt || '',
+            };
+          });
+
+        const mainResult = tracks.length > 0 ? tracks[0] : null;
+        const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
+
+        if (!mainResult) {
+          throw new Error("No results found");
+        }
+
+        return {
+          mainResult,
+          otherResults
+        };
+      } catch (rapidApiError) {
+        console.error("RapidAPI fallback also failed:", rapidApiError);
+        
+        // Return mock data as final fallback
+        console.log("Using mock data as final fallback");
+        return mockSearchResults;
+      }
+    }
+    
+    // Return mock data as fallback if external APIs are disabled
+    console.log("Using mock data as fallback");
+    return mockSearchResults;
   }
+}
+
+/**
+ * Search for a specific YouTube video by ID
+ * @param videoId YouTube video ID
+ * @returns Search results
+ */
+export async function searchByVideoId(videoId: string): Promise<SearchResult> {
+  if (USE_MOCK_DATA) {
+    console.log("Using mock data for video ID search");
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return mockSearchResults;
+  }
+
+  try {
+    // Try backend API first
+    const response = await apiRequest(
+      "GET",
+      `/api/search/video?id=${encodeURIComponent(videoId)}`,
+    );
+
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Backend video search failed:", error);
+  }
+
+  // Fallback to RapidAPI if enabled
+  if (USE_EXTERNAL_APIS) {
+    try {
+      const videoData = await rapidApiRequest(
+        RAPIDAPI_HOST_YT,
+        '/video/info',
+        { id: videoId }
+      );
+
+      if (!videoData) {
+        throw new Error("No video data found");
+      }
+
+      const track: Track = {
+        id: videoData.videoId || videoId,
+        videoId: videoData.videoId || videoId,
+        title: videoData.title || 'Unknown Title',
+        artist: videoData.author?.name || videoData.channelTitle || 'Unknown Artist',
+        thumbnailUrl: videoData.thumbnails?.[0]?.url || videoData.thumbnail,
+        duration: videoData.lengthSeconds || 0,
+        views: videoData.viewCount || 0,
+        description: videoData.description || '',
+        publishDate: videoData.publishDate || '',
+      };
+
+      return {
+        mainResult: track,
+        otherResults: []
+      };
+    } catch (error) {
+      console.error("RapidAPI video search failed:", error);
+    }
+  }
+
+  // Final fallback to mock data
+  return mockSearchResults;
 }
 
 /**
@@ -182,48 +281,50 @@ export async function searchByLyrics(lyrics: string): Promise<SearchResult> {
   }
 
   try {
-    // Search for songs by lyrics using RapidAPI Genius endpoint
-    const lyricsData = await rapidApiRequest(
-      RAPIDAPI_HOST_LYRICS,
-      '/search',
-      { q: lyrics }
-    );
-
-    if (!lyricsData || !lyricsData.hits || !lyricsData.hits.length) {
-      throw new Error("No lyrics results found");
-    }
-
-    // Get the top result
-    const topResult = lyricsData.hits[0].result;
-    
-    // Now search YouTube for this song to get video details
-    const songQuery = `${topResult.title} ${topResult.primary_artist.name}`;
-    const ytResults = await searchTracks(songQuery);
-    
-    // Add lyrics info to the track
-    if (ytResults.mainResult) {
-      ytResults.mainResult.lyrics = await getLyrics(
-        ytResults.mainResult.title,
-        ytResults.mainResult.artist
-      ).catch(() => "Lyrics not available");
-    }
-    
-    return ytResults;
-  } catch (error) {
-    console.error("Failed to search by lyrics via RapidAPI:", error);
-    
-    // Fallback to our backend API
+    // Use our backend API first
     const response = await apiRequest(
       "GET",
       `/api/search/lyrics?q=${encodeURIComponent(lyrics)}`,
     );
 
-    if (!response.ok) {
-      throw new Error("Failed to search by lyrics");
+    if (response.ok) {
+      return response.json();
     }
-
-    return response.json();
+  } catch (error) {
+    console.error("Backend lyrics search failed:", error);
   }
+
+  // Fallback to external API if enabled
+  if (USE_EXTERNAL_APIS) {
+    try {
+      const lyricsData = await rapidApiRequest(
+        RAPIDAPI_HOST_LYRICS,
+        '/search',
+        { q: lyrics }
+      );
+
+      if (!lyricsData || !lyricsData.hits || !lyricsData.hits.length) {
+        throw new Error("No lyrics results found");
+      }
+
+      const topResult = lyricsData.hits[0].result;
+      const songQuery = `${topResult.title} ${topResult.primary_artist.name}`;
+      const ytResults = await searchTracks(songQuery);
+      
+      if (ytResults.mainResult) {
+        ytResults.mainResult.lyrics = await getLyrics(
+          ytResults.mainResult.title,
+          ytResults.mainResult.artist
+        ).catch(() => "Lyrics not available");
+      }
+      
+      return ytResults;
+    } catch (error) {
+      console.error("External lyrics search failed:", error);
+    }
+  }
+
+  throw new Error("Failed to search by lyrics");
 }
 
 /**

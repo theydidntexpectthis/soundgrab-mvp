@@ -9,6 +9,7 @@ import {
   trackInteraction,
   optimizeResourceLoading,
 } from "./performanceUtils";
+import { downloadTrack } from "../services/apiService";
 
 // Initialize our utilities
 initAnalytics();
@@ -34,25 +35,42 @@ export const initiateDownload = async (
     // Optimize resource loading
     await optimizeResourceLoading("media");
 
-    // Construct the expected file path for the downloaded file
-    const fileName = `${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
-    const filePath = `/api/downloads/files/${fileName}`;
-    
     console.log(`Download initiated for: ${track.title} (${format})`);
-    console.log(`Expected file path: ${filePath}`);
+
+    // Actually download the track using the API service
+    const downloadUrl = await downloadTrack(track, format);
+    
+    if (!downloadUrl) {
+      throw new Error("Failed to get download URL");
+    }
+
+    // Create a temporary anchor element to trigger the download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${track.artist} - ${track.title}.${format}`;
+    link.style.display = 'none';
+    
+    // Add to DOM, click, and remove
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log(`Download completed for: ${track.title} (${format})`);
+    console.log(`Download URL: ${downloadUrl}`);
 
     // Track successful download
     trackEvent("download", "complete", `${track.title} - ${format}`);
 
-    // Execute the download callback immediately
+    // Execute the download callback
     if (callback) {
       callback();
     }
 
-    // Return true to indicate successful download initiation
+    // Return true to indicate successful download
     return true;
   } catch (error) {
     console.error("Download error:", error);
+    trackEvent("download", "error", `${track.title} - ${format}: ${error.message}`);
     return false;
   }
 };

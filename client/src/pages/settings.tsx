@@ -71,7 +71,7 @@ export default function SettingsPage() {
         <Card className="bg-surface">
           <CardHeader>
             <CardTitle>API Connections</CardTitle>
-            <CardDescription className="text-black dark:text-gray-300">
+            <CardDescription className="text-muted-foreground">
               Connect to external services to enhance functionality
             </CardDescription>
           </CardHeader>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
                   }
                   className="bg-surface-light mt-1"
                 />
-                <p className="text-black dark:text-gray-300 text-xs mt-1">
+                <p className="text-muted-foreground text-xs mt-1">
                   Used for lyrics search and retrieval. Get a key at{" "}
                   <a
                     href="https://genius.com/api-clients"
@@ -108,7 +108,7 @@ export default function SettingsPage() {
         <Card className="bg-surface">
           <CardHeader>
             <CardTitle>Download Settings</CardTitle>
-            <CardDescription className="text-black dark:text-gray-300">
+            <CardDescription className="text-muted-foreground">
               Configure how your music is downloaded
             </CardDescription>
           </CardHeader>
@@ -177,7 +177,7 @@ export default function SettingsPage() {
         <Card className="bg-surface">
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
-            <CardDescription className="text-black dark:text-gray-300">
+            <CardDescription className="text-muted-foreground">
               Customize the application's look and feel
             </CardDescription>
           </CardHeader>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="theme-mode">Dark Mode</Label>
-                  <p className="text-black dark:text-gray-300 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     Use dark theme for a more comfortable viewing experience in
                     low light
                   </p>
@@ -206,14 +206,14 @@ export default function SettingsPage() {
         <Card className="bg-surface">
           <CardHeader>
             <CardTitle>Privacy</CardTitle>
-            <CardDescription className="text-black dark:text-gray-300">Manage your data and history</CardDescription>
+            <CardDescription className="text-muted-foreground">Manage your data and history</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="save-history">Save Search History</Label>
-                  <p className="text-black dark:text-gray-300 text-xs">
+                  <p className="text-muted-foreground text-xs">
                     Remember your recent searches for quicker access
                   </p>
                 </div>
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                 >
                   Clear Search & Download History
                 </Button>
-                <p className="text-black dark:text-gray-300 text-xs mt-1">
+                <p className="text-muted-foreground text-xs mt-1">
                   This will permanently remove all your search and download
                   records
                 </p>
@@ -256,13 +256,13 @@ export default function SettingsPage() {
       {/* Ad placement */}
       <div className="mt-8 bg-surface-light rounded-lg p-4 flex items-center justify-between">
         <div>
-          <p className="text-xs text-black dark:text-gray-300 mb-1">Sponsored</p>
-          <div className="text-sm mb-1 text-black dark:text-white">Upgrade to SoundGrab Premium</div>
-          <p className="text-xs text-black dark:text-gray-300">
+          <p className="text-xs text-muted-foreground mb-1">Sponsored</p>
+          <div className="text-sm mb-1 text-foreground">Upgrade to SoundGrab Premium</div>
+          <p className="text-xs text-muted-foreground">
             Remove ads, unlock unlimited downloads, and get priority support.
           </p>
         </div>
-        <Button className="bg-accent text-white px-4 py-2 rounded-lg text-sm">
+        <Button className="bg-accent text-accent-foreground px-4 py-2 rounded-lg text-sm">
           Go Premium
         </Button>
       </div>

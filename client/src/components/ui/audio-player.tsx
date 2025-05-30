@@ -228,7 +228,7 @@ export function AudioPlayer({
         />
       </div>
 
-      <div className="flex justify-between text-black dark:text-gray-300 text-xs">
+      <div className="flex justify-between text-muted-foreground text-xs">
         <span>{formatTime(currentTime)}</span>
         <span>{formatTime(duration)}</span>
       </div>
