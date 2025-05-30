@@ -16,6 +16,13 @@ const USE_EXTERNAL_APIS = import.meta.env.VITE_USE_EXTERNAL_APIS === 'true';
 
 // RapidAPI configuration (only used if external APIs are enabled)
 const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
+
+// Debug logging for API configuration
+console.log('🔧 API Configuration Debug:');
+console.log('- USE_MOCK_DATA:', USE_MOCK_DATA);
+console.log('- API_BASE_URL:', API_BASE_URL);
+console.log('- USE_EXTERNAL_APIS:', USE_EXTERNAL_APIS);
+console.log('- RAPIDAPI_KEY:', RAPIDAPI_KEY ? 'Set' : 'Not set');
 const RAPIDAPI_HOST_YT = "youtube-search-and-download.p.rapidapi.com";
 const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com";
 const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com";
@@ -88,18 +95,23 @@ export async function searchTracks(
 
   try {
     // Always use our backend API for consistency
+    const apiUrl = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`;
+    console.log('🔍 Attempting API search:', apiUrl);
+    
     const response = await apiRequest(
       "GET",
-      `/api/search?q=${encodeURIComponent(query)}&sort=${sortBy}`,
+      apiUrl,
     );
 
     if (!response.ok) {
       throw new Error("Failed to search for tracks");
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log('✅ API search successful:', result);
+    return result;
   } catch (error) {
-    console.error("Failed to search tracks:", error);
+    console.error("❌ Failed to search tracks:", error);
     
     // If external APIs are enabled and backend fails, try RapidAPI as fallback
     if (USE_EXTERNAL_APIS) {

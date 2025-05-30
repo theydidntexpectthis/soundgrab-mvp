@@ -29,10 +29,10 @@ export function LyricsSearchBox({
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 mb-1">
               <Music size={18} className="text-primary" />
-              <h3 className="text-lg font-medium">Search by Lyrics</h3>
+              <h3 className="text-lg font-medium text-foreground">Search by Lyrics</h3>
             </div>
 
-            <p className="text-black dark:text-gray-300 text-sm mb-2">
+            <p className="text-foreground text-sm mb-2">
               Paste a few lines of lyrics to find the song you're looking for
             </p>
 
@@ -52,8 +52,8 @@ export function LyricsSearchBox({
               {isSearching ? "Searching..." : "Find Song"}
             </Button>
 
-            <div className="mt-2 text-xs text-black dark:text-gray-300">
-              <p>Tips:</p>
+            <div className="mt-2 text-xs text-foreground">
+              <p className="font-medium">Tips:</p>
               <ul className="list-disc pl-5 mt-1 space-y-1">
                 <li>Enter at least a full line of lyrics for better results</li>
                 <li>Include a unique part of the song if possible</li>

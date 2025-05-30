@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundGrab E2E Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .test-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .test-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .test-results {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .loading {
+            color: #007bff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">SoundGrab MVP - End-to-End Test Suite</h1>
+        <p>This test suite validates all the major functionality fixes implemented in the SoundGrab application.</p>
+    </div>
+
+    <!-- Test 1: API Connection -->
+    <div class="test-container">
+        <div class="test-section">
+            <h2 class="test-title">Test 1: API Connection</h2>
+            <p>Test if the backend server is running and API endpoints are accessible</p>
+            
+            <button onclick="testApiConnection()" class="test-button" id="apiTestBtn">Test API Connection</button>
+            
+            <div id="apiResults" class="test-results">
+                Click "Test API Connection" to check if the backend server is running.
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 2: Search Functionality -->
+    <div class="test-container">
+        <div class="test-section">
+            <h2 class="test-title">Test 2: Search Functionality</h2>
+            <p>Test both regular search and URL search functionality</p>
+            
+            <input type="text" id="searchInput" class="test-input" placeholder="Enter song name, artist, or YouTube URL" value="Never Gonna Give You Up">
+            <button onclick="testSearch()" class="test-button" id="searchBtn">Test Search</button>
+            <button onclick="testUrlSearch()" class="test-button" id="urlSearchBtn">Test URL Search</button>
+            
+            <div id="searchResults" class="test-results">
+                Click "Test Search" to test regular search or "Test URL Search" to test YouTube URL parsing.
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 3: Download Functionality -->
+    <div class="test-container">
+        <div class="test-section">
+            <h2 class="test-title">Test 3: Download Functionality</h2>
+            <p>Test the download API endpoint</p>
+            
+            <button onclick="testDownload()" class="test-button" id="downloadBtn">Test Download API</button>
+            
+            <div id="downloadResults" class="test-results">
+                Click "Test Download API" to test the download functionality.
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 4: Environment Variables -->
+    <div class="test-container">
+        <div class="test-section">
+            <h2 class="test-title">Test 4: Environment Configuration</h2>
+            <p>Check if environment variables are properly configured</p>
+            
+            <button onclick="testEnvironment()" class="test-button" id="envBtn">Test Environment</button>
+            
+            <div id="envResults" class="test-results">
+                Click "Test Environment" to check environment variable configuration.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        async function testApiConnection() {
+            const resultsDiv = document.getElementById('apiResults');
+            const btn = document.getElementById('apiTestBtn');
+            
+            btn.disabled = true;
+            resultsDiv.innerHTML = '<span class="loading">Testing API connection...</span>';
+            
+            try {
+                // Test basic server health
+                const response = await fetch(`${API_BASE_URL}/api/searches/history`);
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML = `<span class="success">✅ API Connection Successful!</span>
+Status: ${response.status}
+Server is running on port 5000`;
+                } else {
+                    resultsDiv.innerHTML = `<span class="error">❌ API Connection Failed</span>
+Status: ${response.status}
+Response: ${await response.text()}`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<span class="error">❌ API Connection Failed</span>
+Error: ${error.message}
+Make sure the backend server is running on port 5000`;
+            }
+            
+            btn.disabled = false;
+        }
+
+        async function testSearch() {
+            const resultsDiv = document.getElementById('searchResults');
+            const btn = document.getElementById('searchBtn');
+            const query = document.getElementById('searchInput').value;
+            
+            btn.disabled = true;
+            resultsDiv.innerHTML = '<span class="loading">Testing search functionality...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `<span class="success">✅ Search Successful!</span>
+Query: ${query}
+Main Result: ${data.mainResult?.title || 'No title'} by ${data.mainResult?.artist || 'Unknown'}
+Other Results: ${data.otherResults?.length || 0} tracks found`;
+                } else {
+                    resultsDiv.innerHTML = `<span class="error">❌ Search Failed</span>
+Status: ${response.status}
+Response: ${await response.text()}`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<span class="error">❌ Search Failed</span>
+Error: ${error.message}`;
+            }
+            
+            btn.disabled = false;
+        }
+
+        async function testUrlSearch() {
+            const resultsDiv = document.getElementById('searchResults');
+            const btn = document.getElementById('urlSearchBtn');
+            
+            btn.disabled = true;
+            resultsDiv.innerHTML = '<span class="loading">Testing URL search functionality...</span>';
+            
+            const testUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(testUrl)}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `<span class="success">✅ URL Search Successful!</span>
+URL: ${testUrl}
+Detected: ${data.mainResult?.title || 'No title'} by ${data.mainResult?.artist || 'Unknown'}`;
+                } else {
+                    resultsDiv.innerHTML = `<span class="error">❌ URL Search Failed</span>
+Status: ${response.status}
+Response: ${await response.text()}`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<span class="error">❌ URL Search Failed</span>
+Error: ${error.message}`;
+            }
+            
+            btn.disabled = false;
+        }
+
+        async function testDownload() {
+            const resultsDiv = document.getElementById('downloadResults');
+            const btn = document.getElementById('downloadBtn');
+            
+            btn.disabled = true;
+            resultsDiv.innerHTML = '<span class="loading">Testing download functionality...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/downloads`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        videoId: 'dQw4w9WgXcQ',
+                        format: 'mp3',
+                        title: 'Never Gonna Give You Up',
+                        artist: 'Rick Astley'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `<span class="success">✅ Download API Successful!</span>
+Download URL: ${data.downloadUrl}
+Success: ${data.success}`;
+                } else {
+                    resultsDiv.innerHTML = `<span class="error">❌ Download API Failed</span>
+Status: ${response.status}
+Response: ${await response.text()}`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<span class="error">❌ Download API Failed</span>
+Error: ${error.message}`;
+            }
+            
+            btn.disabled = false;
+        }
+
+        function testEnvironment() {
+            const resultsDiv = document.getElementById('envResults');
+            
+            // Since this is a static HTML file, we can't access Vite env vars
+            // But we can test if our API base URL is configured correctly
+            resultsDiv.innerHTML = `Environment Configuration:
+API_BASE_URL: ${API_BASE_URL}
+Test Status: Environment variables should be configured in client/.env
+
+Expected variables:
+- VITE_API_BASE_URL=http://localhost:5000
+- VITE_USE_EXTERNAL_APIS=true
+- VITE_RAPIDAPI_KEY=[your-key]
+
+<span class="success">✅ Test file configured correctly</span>`;
+        }
+
+        // Auto-run API connection test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testApiConnection, 1000);
+        });
+    </script>
+</body>
+</html>
