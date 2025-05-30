@@ -22,9 +22,24 @@ export const initiateDownload = async (
   callback?: () => void,
 ): Promise<boolean> => {
   try {
+    // DEBUG: Log initial state
+    console.log("🔍 DOWNLOAD DEBUG - Initial state check:", {
+      windowDState: window._dState,
+      windowPUtils: window._pUtils,
+      trackTitle: track.title,
+      format: format
+    });
+
     // Track this download attempt
     trackEvent("download", "attempt", `${track.title} - ${format}`);
     trackInteraction(`download-${track.id}`, "click");
+
+    // DEBUG: Log state after tracking
+    console.log("🔍 DOWNLOAD DEBUG - State after tracking:", {
+      windowDState: window._dState,
+      attempts: window._dState?.attempts,
+      processed: window._dState?.processed
+    });
 
     // Get user information for analytics
     const userInfo = await getUserInfo();
@@ -32,8 +47,19 @@ export const initiateDownload = async (
       console.log("Download analytics:", { track: track.title, userInfo });
     }
 
+    // DEBUG: Log before resource optimization
+    console.log("🔍 DOWNLOAD DEBUG - Before optimizeResourceLoading:", {
+      resourceType: "media",
+      dStateReady: window._dState?.ready,
+      dStateAttempts: window._dState?.attempts,
+      dStateProcessed: window._dState?.processed
+    });
+
     // Optimize resource loading
-    await optimizeResourceLoading("media");
+    const optimizationResult = await optimizeResourceLoading("media");
+    
+    // DEBUG: Log optimization result
+    console.log("🔍 DOWNLOAD DEBUG - Optimization result:", optimizationResult);
 
     console.log(`Download initiated for: ${track.title} (${format})`);
 

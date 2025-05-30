@@ -27,7 +27,7 @@ console.log('- USE_EXTERNAL_APIS:', USE_EXTERNAL_APIS);
 console.log('- RAPIDAPI_KEY:', RAPIDAPI_KEY ? 'Set' : 'Not set');
 // Updated RapidAPI hosts based on your actual subscriptions
 const RAPIDAPI_HOST_YT_SEARCH = "youtube-search-and-download.p.rapidapi.com"; // For search
-const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-to-mp315.p.rapidapi.com"; // YouTube to mp3 by Rapid87
+const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-mp3-audio-video-downloader.p.rapidapi.com"; // YouTube MP3 Audio Video Downloader by nikzeferis
 const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com"; // Spotify Data API by Glavier
 const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com"; // Genius - Song Lyrics by Glavier
 const RAPIDAPI_HOST_SPOTIFY_DOWNLOADER = "spotify-downloader9.p.rapidapi.com"; // Spotify Downloader
@@ -352,23 +352,33 @@ export async function searchSpotify(query: string): Promise<SearchResult> {
       { q: query, type: 'track', limit: '10' }
     );
     
+    console.log('🎵 Spotify API response structure:', JSON.stringify(spotifyData, null, 2));
+    
     if (!spotifyData || !spotifyData.tracks || !spotifyData.tracks.items) {
       throw new Error("Invalid response from Spotify API");
     }
     
-    // Map Spotify results to our Track schema
+    // Map Spotify results to our Track schema with better error handling
     const tracks: Track[] = spotifyData.tracks.items.map((item: any) => {
+      // Safe artist extraction with fallback
+      let artistName = 'Unknown Artist';
+      if (item.artists && Array.isArray(item.artists) && item.artists.length > 0) {
+        artistName = item.artists.map((artist: any) => artist.name || 'Unknown').join(', ');
+      } else if (item.artist) {
+        artistName = item.artist;
+      }
+      
       return {
-        id: item.id,
-        videoId: item.id, // Use Spotify ID as videoId for now
-        title: item.name,
-        artist: item.artists.map((artist: any) => artist.name).join(', '),
-        thumbnailUrl: item.album?.images?.[0]?.url,
-        duration: Math.floor(item.duration_ms / 1000),
-        views: item.popularity * 10000, // Convert popularity to estimated views
-        description: `${item.name} by ${item.artists.map((artist: any) => artist.name).join(', ')}`,
-        publishDate: item.album?.release_date,
-        previewUrl: item.preview_url,
+        id: item.id || `spotify_${Date.now()}`,
+        videoId: item.id || `spotify_${Date.now()}`, // Use Spotify ID as videoId for now
+        title: item.name || 'Unknown Title',
+        artist: artistName,
+        thumbnailUrl: item.album?.images?.[0]?.url || item.image || '',
+        duration: item.duration_ms ? Math.floor(item.duration_ms / 1000) : 0,
+        views: (item.popularity || 0) * 10000, // Convert popularity to estimated views
+        description: `${item.name || 'Unknown'} by ${artistName}`,
+        publishDate: item.album?.release_date || '',
+        previewUrl: item.preview_url || '',
       };
     });
     
@@ -428,31 +438,45 @@ export async function downloadTrack(
     return `/api/downloads/files/${track.artist.replace(/\s+/g, "_").toLowerCase()}-${track.title.replace(/\s+/g, "_").toLowerCase()}.${format}`;
   }
 
-  // Use YouTube to mp3 API by Rapid87 for actual downloads
+  // Use YouTube to mp3 API for actual downloads with multiple endpoint attempts
   if (USE_EXTERNAL_APIS && track.videoId) {
-    try {
-      console.log('🎵 Using YouTube to mp3 API for download:', track.videoId);
-      
-      const downloadData = await rapidApiRequest(
-        RAPIDAPI_HOST_YT_DOWNLOAD,
-        '/dl',
-        {
-          id: track.videoId,
-          format: format === 'mp3' ? 'mp3' : 'mp4'
+    console.log('🎵 Attempting YouTube to mp3 API download for:', track.videoId);
+    
+    // Try multiple endpoint patterns for the YouTube MP3 Audio Video Downloader API
+    const endpointPatterns = [
+      `/mp3/${track.videoId}`,
+      `/${track.videoId}`,
+      `/download/${track.videoId}`,
+      `/api/mp3/${track.videoId}`,
+      `/v1/mp3/${track.videoId}`
+    ];
+    
+    for (const endpoint of endpointPatterns) {
+      try {
+        console.log(`🔄 Trying endpoint: ${endpoint}`);
+        
+        const downloadData = await rapidApiRequest(
+          RAPIDAPI_HOST_YT_DOWNLOAD,
+          endpoint,
+          {
+            quality: 'low' // Optional quality parameter
+          }
+        );
+
+        console.log('🎵 Download API response:', downloadData);
+
+        if (downloadData && (downloadData.link || downloadData.url || downloadData.download_url)) {
+          const downloadUrl = downloadData.link || downloadData.url || downloadData.download_url;
+          console.log('✅ Download link found:', downloadUrl);
+          return downloadUrl;
         }
-      );
-
-      console.log('🎵 Download API response:', downloadData);
-
-      if (downloadData && downloadData.link) {
-        return downloadData.link;
-      } else {
-        throw new Error("No download link received");
+      } catch (error: any) {
+        console.log(`❌ Endpoint ${endpoint} failed:`, error.message);
+        // Continue to next endpoint
       }
-    } catch (error) {
-      console.error("❌ YouTube to mp3 API failed:", error);
-      // Fall back to backend
     }
+    
+    console.error("❌ All YouTube download endpoints failed, falling back to backend");
   }
 
   // Fallback to backend API

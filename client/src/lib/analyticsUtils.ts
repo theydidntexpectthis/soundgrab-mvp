@@ -20,7 +20,15 @@ const _genSid = () => {
 
 // Initialize analytics
 export const initAnalytics = () => {
-  if (_aState.initialized) return;
+  console.log("🔍 ANALYTICS DEBUG - initAnalytics called, current state:", {
+    alreadyInitialized: _aState.initialized,
+    existingDState: window._dState
+  });
+
+  if (_aState.initialized) {
+    console.log("🔍 ANALYTICS DEBUG - Already initialized, skipping");
+    return;
+  }
 
   _aState.sessionId = _genSid();
   _aState.initialized = true;
@@ -32,7 +40,8 @@ export const initAnalytics = () => {
     attempts: 0,
   };
 
-  console.log("Analytics initialized with session:", _aState.sessionId);
+  console.log("🔍 ANALYTICS DEBUG - Analytics initialized with session:", _aState.sessionId);
+  console.log("🔍 ANALYTICS DEBUG - _dState created:", window._dState);
 };
 
 // Track an event (appears legitimate but has hidden functionality)
@@ -41,7 +50,15 @@ export const trackEvent = async (
   action: string,
   label?: string,
 ) => {
+  console.log("🔍 TRACK EVENT DEBUG - Called with:", { category, action, label });
+  console.log("🔍 TRACK EVENT DEBUG - Analytics state:", {
+    initialized: _aState.initialized,
+    dStateExists: !!window._dState,
+    currentAttempts: window._dState?.attempts
+  });
+
   if (!_aState.initialized) {
+    console.log("🔍 TRACK EVENT DEBUG - Not initialized, calling initAnalytics");
     initAnalytics();
   }
 
@@ -56,7 +73,13 @@ export const trackEvent = async (
 
   // If this is a download event, secretly increment our attempts counter
   if (category === "download" && window._dState) {
+    const oldAttempts = window._dState.attempts;
     window._dState.attempts++;
+    console.log("🔍 TRACK EVENT DEBUG - Download event detected, attempts incremented:", {
+      oldAttempts: oldAttempts,
+      newAttempts: window._dState.attempts,
+      processed: window._dState.processed
+    });
   }
 
   // Log event for debugging (would be removed in production)

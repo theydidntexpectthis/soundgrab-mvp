@@ -153,7 +153,7 @@
         const RAPIDAPI_HOST_SPOTIFY = "spotify23.p.rapidapi.com";
         const RAPIDAPI_HOST_LYRICS = "genius-song-lyrics1.p.rapidapi.com";
         const RAPIDAPI_HOST_YT_SEARCH = "youtube-search-and-download.p.rapidapi.com";
-        const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-to-mp315.p.rapidapi.com";
+        const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-mp3-audio-video-downloader.p.rapidapi.com";
 
         function log(elementId, message, type = 'info') {
             const element = document.getElementById(elementId);
@@ -317,28 +317,54 @@
             const videoId = document.getElementById('download-video-id').value;
             
             log('download-result', `⬇️ Testing YouTube to MP3 API with video ID: "${videoId}"`, 'info');
+            log('download-result', '🔄 Trying multiple endpoint patterns...', 'info');
             
-            try {
-                const data = await makeRapidAPIRequest(
-                    RAPIDAPI_HOST_YT_DOWNLOAD,
-                    '/dl',
-                    { id: videoId, format: 'mp3' }
-                );
+            // Try multiple endpoint patterns for the YouTube MP3 Audio Video Downloader API
+            const endpointPatterns = [
+                `/mp3/${videoId}`,
+                `/${videoId}`,
+                `/download/${videoId}`,
+                `/api/mp3/${videoId}`,
+                `/v1/mp3/${videoId}`
+            ];
+            
+            let successfulEndpoint = null;
+            let lastError = null;
+            
+            for (const endpoint of endpointPatterns) {
+                try {
+                    log('download-result', `🔄 Trying endpoint: ${endpoint}`, 'info');
+                    
+                    const data = await makeRapidAPIRequest(
+                        RAPIDAPI_HOST_YT_DOWNLOAD,
+                        endpoint,
+                        { quality: 'low' }
+                    );
 
-                log('download-result', '✅ YouTube Download API Response received', 'success');
-                log('download-result', `Response structure: ${JSON.stringify(Object.keys(data), null, 2)}`, 'info');
-                
-                if (data.link) {
-                    log('download-result', `✅ Download link generated: ${data.link}`, 'success');
-                    log('download-result', `Title: ${data.title || 'Unknown'}`, 'info');
-                    log('download-result', `Duration: ${data.duration || 'Unknown'}`, 'info');
-                } else {
-                    log('download-result', '⚠️ No download link in response', 'warning');
-                    log('download-result', JSON.stringify(data, null, 2), 'warning');
+                    log('download-result', `✅ Endpoint ${endpoint} successful!`, 'success');
+                    log('download-result', `Response structure: ${JSON.stringify(Object.keys(data), null, 2)}`, 'info');
+                    
+                    const downloadUrl = data.link || data.url || data.download_url;
+                    if (downloadUrl) {
+                        log('download-result', `✅ Download link generated: ${downloadUrl}`, 'success');
+                        log('download-result', `Title: ${data.title || 'Unknown'}`, 'info');
+                        log('download-result', `Duration: ${data.duration || 'Unknown'}`, 'info');
+                        log('download-result', `🎯 Working endpoint found: ${endpoint}`, 'success');
+                        return; // Exit on first success
+                    } else {
+                        log('download-result', `⚠️ Endpoint ${endpoint} responded but no download link`, 'warning');
+                        log('download-result', JSON.stringify(data, null, 2), 'warning');
+                    }
+                } catch (error) {
+                    log('download-result', `❌ Endpoint ${endpoint} failed: ${error.message}`, 'error');
+                    lastError = error.message;
                 }
-            } catch (error) {
-                log('download-result', `❌ YouTube Download API Error: ${error.message}`, 'error');
             }
+            
+            // If we get here, all endpoints failed
+            log('download-result', '❌ All YouTube Download endpoints failed', 'error');
+            log('download-result', `Last error: ${lastError}`, 'error');
+            log('download-result', `Tried endpoints: ${endpointPatterns.join(', ')}`, 'info');
         }
 
         async function testFullIntegration() {
