@@ -11,7 +11,9 @@ import {
 const USE_MOCK_DATA = false; // Using real API connections
 
 // Environment-based API configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// In production, use relative URLs (same origin), in development use localhost
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.MODE === 'production' ? '' : 'http://localhost:5000');
 const USE_EXTERNAL_APIS = import.meta.env.VITE_USE_EXTERNAL_APIS === 'true';
 
 // RapidAPI configuration (only used if external APIs are enabled)

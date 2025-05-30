@@ -2,7 +2,7 @@
   "name": "soundgrab",
   "version": "1.0.0",
   "description": "A full-stack music search and download application",
-  "main": "server/prod-server.js",
+  "main": "server/dist/index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch server/index.ts",
@@ -10,7 +10,7 @@
     "build": "node build.js",
     "build:client": "cd client && npm run build",
     "build:server": "tsc --project server/tsconfig.json",
-    "start": "node server/prod-server.js",
+    "start": "node server/dist/index.js",
     "clean": "rm -rf client/dist server/dist",
     "deploy": "fly deploy",
     "deploy:logs": "fly logs",
