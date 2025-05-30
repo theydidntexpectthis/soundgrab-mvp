@@ -37,12 +37,30 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Enhanced environment logging for debugging
+  log('🚀 Starting SoundGrab Server');
+  log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  log(`App Environment: ${app.get("env")}`);
+  log(`Port: ${process.env.PORT || 5000}`);
+  log(`Host: ${process.env.HOSTNAME || '0.0.0.0'}`);
+
   const server = await registerRoutes(app);
+
+  // Add health check endpoint for debugging
+  app.get('/api/health', (_req: Request, res: Response) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || 5000
+    });
+  });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    log(`❌ Error ${status}: ${message}`);
     res.status(status).json({ message });
     throw err;
   });
@@ -51,8 +69,10 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
+    log('🔧 Setting up Vite development server');
     await setupVite(app, server);
   } else {
+    log('📦 Setting up static file serving for production');
     serveStatic(app);
   }
 
@@ -65,6 +85,10 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`✅ Server successfully started on port ${port}`);
+    log(`🌐 Access at: http://localhost:${port}`);
+    if (process.env.NODE_ENV === 'production') {
+      log('🚀 Production mode: Serving built client from /client/dist');
+    }
   });
 })();

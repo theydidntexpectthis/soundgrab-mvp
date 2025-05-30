@@ -1,22 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import ytdl from 'ytdl-core';
-import axios from 'axios';
-import { getLyrics, getSong } from 'genius-lyrics-api';
 import { SearchResult, Track } from '../shared/schema';
-import path from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
-
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
-
-// Create download directory if it doesn't exist
-const downloadDir = path.join(process.cwd(), 'downloads');
-if (!fs.existsSync(downloadDir)) {
-  fs.mkdirSync(downloadDir, { recursive: true });
-}
 
 /**
  * Register all API routes for the application
@@ -34,19 +19,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Search query is required' });
       }
       
-      console.log(`Searching for: ${query} (sort: ${sort})`);
+      console.log(`🔍 Backend API: Searching for: "${query}" (sort: ${sort})`);
       
-      // Search on YouTube for videos
-      const searchResults = await searchYouTube(query, sort);
+      // Create mock search results for now
+      const searchResults = await createMockSearchResults(query);
       
       // Save search query to history
       if (searchResults.mainResult) {
         await storage.saveSearchQuery(query, searchResults);
       }
       
+      console.log(`✅ Backend API: Returning results for: "${query}"`);
       return res.json(searchResults);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('❌ Backend API: Search error:', error);
       return res.status(500).json({ error: 'Failed to perform search' });
     }
   });
@@ -60,16 +46,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Video ID is required' });
       }
       
-      console.log(`Downloading video: ${videoId} as ${format}`);
+      console.log(`📥 Backend API: Download request for video: ${videoId} as ${format}`);
       
-      // Generate safe filename
-      const safeTitle = title ? title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : videoId;
-      const safeArtist = artist ? artist.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'unknown';
-      const fileName = `${safeArtist}-${safeTitle}.${format || 'mp3'}`;
-      const filePath = path.join(downloadDir, fileName);
-      
-      // Download the file
-      await downloadYouTubeVideo(videoId, filePath, format);
+      // For now, return a mock download URL
+      const fileName = `${artist || 'unknown'}-${title || videoId}.${format || 'mp3'}`;
+      const downloadUrl = `/api/downloads/files/${fileName}`;
       
       // Create download record
       await storage.saveDownload({
@@ -77,15 +58,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: title || 'Unknown Title',
         artist: artist || 'Unknown Artist',
         format: format || 'mp3',
-        filePath,
+        filePath: `/downloads/${fileName}`,
         downloadDate: new Date()
       });
       
-      // Return download URL
-      const downloadUrl = `/api/downloads/files/${fileName}`;
+      console.log(`✅ Backend API: Download URL generated: ${downloadUrl}`);
       return res.json({ success: true, downloadUrl });
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('❌ Backend API: Download error:', error);
       return res.status(500).json({ error: 'Failed to download video' });
     }
   });
@@ -93,71 +73,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint to serve downloaded files
   app.get('/api/downloads/files/:filename', (req: Request, res: Response) => {
     const filename = req.params.filename;
-    const filePath = path.join(downloadDir, filename);
+    console.log(`📁 Backend API: File request for: ${filename}`);
     
-    if (fs.existsSync(filePath)) {
-      return res.download(filePath);
-    } else {
-      return res.status(404).json({ error: 'File not found' });
-    }
+    // For now, return a 404 since we don't have actual files
+    return res.status(404).json({ error: 'File not found - downloads not implemented yet' });
   });
 
   // Get download history
   app.get('/api/downloads/history', async (req: Request, res: Response) => {
     try {
+      console.log('📋 Backend API: Getting download history');
       const downloads = await storage.getDownloads();
       return res.json(downloads);
     } catch (error) {
-      console.error('Error getting download history:', error);
+      console.error('❌ Backend API: Error getting download history:', error);
       return res.status(500).json({ error: 'Failed to retrieve download history' });
-    }
-  });
-
-  // Get active downloads
-  app.get('/api/downloads/active', async (req: Request, res: Response) => {
-    try {
-      // For now, return empty array since we don't have real-time download tracking
-      // In a real implementation, this would return currently downloading files
-      return res.json([]);
-    } catch (error) {
-      console.error('Error getting active downloads:', error);
-      return res.status(500).json({ error: 'Failed to retrieve active downloads' });
-    }
-  });
-
-  // Pause download endpoint
-  app.patch('/api/downloads/:id/pause', async (req: Request, res: Response) => {
-    try {
-      const downloadId = req.params.id;
-      // In a real implementation, this would pause the download
-      console.log(`Pausing download: ${downloadId}`);
-      return res.json({ success: true, message: 'Download paused' });
-    } catch (error) {
-      console.error('Error pausing download:', error);
-      return res.status(500).json({ error: 'Failed to pause download' });
-    }
-  });
-
-  // Cancel download endpoint
-  app.delete('/api/downloads/:id', async (req: Request, res: Response) => {
-    try {
-      const downloadId = req.params.id;
-      // In a real implementation, this would cancel and remove the download
-      console.log(`Cancelling download: ${downloadId}`);
-      return res.json({ success: true, message: 'Download cancelled' });
-    } catch (error) {
-      console.error('Error cancelling download:', error);
-      return res.status(500).json({ error: 'Failed to cancel download' });
     }
   });
 
   // Get search history
   app.get('/api/searches/history', async (req: Request, res: Response) => {
     try {
+      console.log('📋 Backend API: Getting search history');
       const searches = await storage.getSearchHistory();
       return res.json(searches);
     } catch (error) {
-      console.error('Error getting search history:', error);
+      console.error('❌ Backend API: Error getting search history:', error);
       return res.status(500).json({ error: 'Failed to retrieve search history' });
     }
   });
@@ -171,235 +112,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Title and artist are required' });
       }
       
-      const lyrics = await getLyrics({
-        apiKey: process.env.GENIUS_API_KEY || '',
-        title: title as string,
-        artist: artist as string,
-        optimizeQuery: true
-      });
+      console.log(`🎵 Backend API: Getting lyrics for: ${title} by ${artist}`);
       
-      if (!lyrics) {
-        return res.status(404).json({ error: 'Lyrics not found' });
-      }
+      // Return mock lyrics for now
+      const lyrics = `Mock lyrics for "${title}" by "${artist}"\n\nVerse 1:\nThis is a mock lyric\nFor testing purposes\n\nChorus:\nMock lyrics, mock lyrics\nTesting the API\n\nVerse 2:\nMore mock content\nTo demonstrate functionality`;
       
       return res.json({ lyrics });
     } catch (error) {
-      console.error('Error getting lyrics:', error);
+      console.error('❌ Backend API: Error getting lyrics:', error);
       return res.status(500).json({ error: 'Failed to fetch lyrics' });
     }
   });
 
   const httpServer = createServer(app);
-
   return httpServer;
 }
 
 /**
- * Search YouTube for videos matching the query
+ * Create mock search results for testing
  * @param query Search query
- * @param sortBy Sort method (relevance, date, etc.)
- * @returns Search results
+ * @returns Mock search results
  */
-async function searchYouTube(query: string, sortBy: string = 'relevance'): Promise<SearchResult> {
-  try {
-    // This would normally use the YouTube API with an API key
-    // For simplicity, we're using a basic approach with ytdl-core
-    
-    // First, attempt to search by lyrics if the query seems like lyrics
-    const lyricsSearch = await searchByLyrics(query);
-    if (lyricsSearch) {
-      return lyricsSearch;
-    }
-    
-    // Otherwise, perform a regular YouTube search
-    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-    
-    const { data } = await axios.get(searchUrl);
-    
-    // Extract video IDs from the response
-    const videoIds = extractVideoIds(data);
-    
-    if (videoIds.length === 0) {
-      throw new Error('No videos found');
-    }
-    
-    // Get details for the main result
-    const mainVideoId = videoIds[0];
-    const mainResult = await getVideoDetails(mainVideoId);
-    
-    // Get details for other results (limit to 5)
-    const otherResultsPromises = videoIds.slice(1, 6).map(id => getVideoDetails(id));
-    const otherResults = await Promise.all(otherResultsPromises);
-    
-    return {
-      mainResult,
-      otherResults
-    };
-  } catch (error) {
-    console.error('YouTube search error:', error);
-    throw new Error('Failed to search YouTube');
-  }
-}
+async function createMockSearchResults(query: string): Promise<SearchResult> {
+  const mainResult: Track = {
+    id: `search_${Date.now()}`,
+    videoId: 'dQw4w9WgXcQ',
+    title: `"${query}" - Top Result`,
+    artist: 'Mock Artist',
+    thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    duration: 212,
+    views: 1000000,
+    description: `Top search result for: ${query}`,
+    publishDate: new Date().toISOString()
+  };
 
-/**
- * Extract video IDs from YouTube search results HTML
- * @param html YouTube search results HTML
- * @returns Array of video IDs
- */
-function extractVideoIds(html: string): string[] {
-  const videoIds: string[] = [];
-  const regex = /watch\?v=([a-zA-Z0-9_-]{11})/g;
-  let match;
-  
-  while ((match = regex.exec(html)) !== null) {
-    const videoId = match[1];
-    if (!videoIds.includes(videoId)) {
-      videoIds.push(videoId);
-    }
-  }
-  
-  return videoIds;
-}
+  const otherResults: Track[] = Array.from({ length: 4 }, (_, i) => ({
+    id: `search_${Date.now()}_${i}`,
+    videoId: `mock_video_${i}`,
+    title: `"${query}" - Result ${i + 2}`,
+    artist: `Mock Artist ${i + 1}`,
+    thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    duration: 180 + i * 30,
+    views: 500000 - i * 100000,
+    description: `Search result ${i + 2} for: ${query}`,
+    publishDate: new Date().toISOString()
+  }));
 
-/**
- * Get details for a YouTube video
- * @param videoId YouTube video ID
- * @returns Track object with video details
- */
-async function getVideoDetails(videoId: string): Promise<Track> {
-  try {
-    const info = await ytdl.getInfo(videoId);
-    const videoDetails = info.videoDetails;
-    
-    // Try to extract artist and title from the video title
-    const { artist, title } = parseVideoTitle(videoDetails.title);
-    
-    return {
-      id: videoId, // Use videoId as the track ID
-      videoId,
-      title,
-      artist,
-      thumbnailUrl: videoDetails.thumbnails.length > 0 ? videoDetails.thumbnails[0].url : undefined,
-      duration: parseInt(videoDetails.lengthSeconds),
-      views: parseInt(videoDetails.viewCount),
-      description: typeof videoDetails.description === 'string' ? videoDetails.description : undefined,
-      publishDate: typeof videoDetails.publishDate === 'string' ? videoDetails.publishDate : undefined
-    };
-  } catch (error) {
-    console.error(`Error getting video details for ${videoId}:`, error);
-    // Return a minimal track object if we can't get full details
-    return {
-      id: videoId,
-      videoId,
-      title: 'Unknown Title',
-      artist: 'Unknown Artist',
-      duration: 0,
-      views: 0
-    };
-  }
-}
-
-/**
- * Parse artist and title from a YouTube video title
- * @param videoTitle YouTube video title
- * @returns Object with artist and title
- */
-function parseVideoTitle(videoTitle: string): { artist: string; title: string } {
-  // Common patterns:
-  // "Artist - Title"
-  // "Artist - Title (Official Video)"
-  // "Title - Artist"
-  // "Title (Artist)"
-  
-  // Try "Artist - Title" pattern first
-  let match = videoTitle.match(/^(.*?)\s*-\s*(.*?)(?:\s*\(.*?\))?$/);
-  if (match) {
-    return { artist: match[1].trim(), title: match[2].trim() };
-  }
-  
-  // Try "Title (Artist)" pattern
-  match = videoTitle.match(/^(.*?)\s*\(\s*(.*?)\s*\)/);
-  if (match) {
-    return { title: match[1].trim(), artist: match[2].trim() };
-  }
-  
-  // Default: use the whole title as the title, and "Unknown Artist" as the artist
-  return { title: videoTitle, artist: 'Unknown Artist' };
-}
-
-/**
- * Search for songs by lyrics
- * @param query Lyrics query
- * @returns Search results if lyrics are found, null otherwise
- */
-async function searchByLyrics(query: string): Promise<SearchResult | null> {
-  try {
-    // Check if the query looks like lyrics (more than 10 words)
-    const words = query.split(/\s+/);
-    if (words.length < 10) {
-      return null;
-    }
-    
-    // Use Genius API to search for songs by lyrics
-    const options = {
-      apiKey: process.env.GENIUS_API_KEY || '',
-      title: query, // Use the query as a general search term
-      artist: '',
-      optimizeQuery: true
-    };
-    
-    const song = await getSong(options);
-    
-    if (!song) {
-      return null;
-    }
-    
-    // Now search YouTube for this song
-    const youtubeQuery = `${song.artist} ${song.title}`;
-    const searchResults = await searchYouTube(youtubeQuery);
-    
-    // Add lyrics to the main result
-    if (searchResults.mainResult) {
-      searchResults.mainResult.lyrics = song.lyrics;
-    }
-    
-    return searchResults;
-  } catch (error) {
-    console.error('Lyrics search error:', error);
-    return null;
-  }
-}
-
-/**
- * Download a YouTube video as audio
- * @param videoId YouTube video ID
- * @param outputPath Output file path
- * @param format Output format (mp3, mp4, etc.)
- */
-async function downloadYouTubeVideo(videoId: string, outputPath: string, format: string = 'mp3'): Promise<void> {
-  return new Promise((resolve, reject) => {
-    try {
-      // Get the appropriate options based on the format
-      const options: ytdl.downloadOptions = {
-        quality: format === 'mp3' ? 'highestaudio' : 'highest'
-      };
-      
-      // Create the download stream
-      const stream = ytdl(`https://www.youtube.com/watch?v=${videoId}`, options);
-      
-      // Handle the download
-      stream.pipe(fs.createWriteStream(outputPath))
-        .on('finish', () => {
-          console.log(`Download complete: ${outputPath}`);
-          resolve();
-        })
-        .on('error', (err) => {
-          console.error(`Download error: ${err}`);
-          reject(err);
-        });
-    } catch (error) {
-      console.error('Error in downloadYouTubeVideo:', error);
-      reject(error);
-    }
-  });
+  return {
+    mainResult,
+    otherResults
+  };
 }

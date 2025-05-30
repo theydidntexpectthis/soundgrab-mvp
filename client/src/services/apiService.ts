@@ -19,12 +19,21 @@ const USE_EXTERNAL_APIS = import.meta.env.VITE_USE_EXTERNAL_APIS === 'true';
 // RapidAPI configuration (only used if external APIs are enabled)
 const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY || "d42dbed423mshd69f27217e2311bp11bd5cjsnc2b55ca495da";
 
-// Debug logging for API configuration
+// Enhanced debug logging for API configuration
 console.log('🔧 API Configuration Debug:');
+console.log('- Environment Mode:', import.meta.env.MODE);
+console.log('- Raw VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('- Computed API_BASE_URL:', API_BASE_URL);
+console.log('- Current Origin:', typeof window !== 'undefined' ? window.location.origin : 'N/A (server)');
 console.log('- USE_MOCK_DATA:', USE_MOCK_DATA);
-console.log('- API_BASE_URL:', API_BASE_URL);
 console.log('- USE_EXTERNAL_APIS:', USE_EXTERNAL_APIS);
 console.log('- RAPIDAPI_KEY:', RAPIDAPI_KEY ? 'Set' : 'Not set');
+
+// Log potential integration issues
+if (import.meta.env.MODE === 'production' && API_BASE_URL.includes('localhost')) {
+  console.error('🚨 INTEGRATION ISSUE: Production mode but API_BASE_URL still points to localhost!');
+  console.error('🚨 This will cause frontend-backend connection failures in deployment');
+}
 // Updated RapidAPI hosts based on your actual subscriptions
 const RAPIDAPI_HOST_YT_SEARCH = "youtube-search-and-download.p.rapidapi.com"; // For search
 const RAPIDAPI_HOST_YT_DOWNLOAD = "youtube-mp3-audio-video-downloader.p.rapidapi.com"; // YouTube MP3 Audio Video Downloader by nikzeferis
@@ -98,74 +107,87 @@ export async function searchTracks(
     return searchByVideoId(videoId);
   }
 
-  // Skip backend scraping entirely and use RapidAPI directly for better reliability
-  if (USE_EXTERNAL_APIS) {
-    console.log('🔍 Using RapidAPI directly for search:', query);
-      try {
-        console.log("Trying RapidAPI fallback for query:", query);
-        
-        const ytData = await rapidApiRequest(
-          RAPIDAPI_HOST_YT_SEARCH,
-          '/search',
-          {
-            query: query,
-            type: 'video',
-            sort: sortBy,
-            limit: '10'
-          }
-        );
+  // Try backend API first
+  try {
+    console.log('🔍 Trying backend API for search:', query);
+    const response = await apiRequest(
+      "GET",
+      `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&sort=${encodeURIComponent(sortBy)}`
+    );
 
-        console.log("RapidAPI response:", ytData);
-
-        if (!ytData || (!ytData.contents && !ytData.videos && !ytData.items)) {
-          throw new Error("Invalid response from YouTube API");
-        }
-
-        // Handle different response formats from different RapidAPI endpoints
-        let videos = ytData.contents || ytData.videos || ytData.items || [];
-        
-        // Map YouTube results to our Track schema
-        const tracks: Track[] = videos
-          .filter((item: any) => item.type === 'video' || item.videoId || item.id)
-          .slice(0, 10)
-          .map((item: any) => {
-            const video = item.video || item;
-            return {
-              id: video.videoId || video.id || Math.random().toString(36),
-              videoId: video.videoId || video.id,
-              title: video.title || 'Unknown Title',
-              artist: video.author?.name || video.channelTitle || video.channel?.name || 'Unknown Artist',
-              thumbnailUrl: video.thumbnails?.[0]?.url || video.thumbnail || video.thumbnails?.high?.url,
-              duration: video.lengthSeconds || video.duration || 0,
-              views: video.viewCount || video.viewCountText ? parseInt(String(video.viewCount || video.viewCountText).replace(/[^0-9]/g, '')) : 0,
-              description: video.description || video.shortDescription || '',
-              publishDate: video.publishedTimeText || video.publishedAt || '',
-            };
-          });
-
-        const mainResult = tracks.length > 0 ? tracks[0] : null;
-        const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
-
-        if (!mainResult) {
-          throw new Error("No results found");
-        }
-
-        return {
-          mainResult,
-          otherResults
-        };
-      } catch (rapidApiError) {
-        console.error("RapidAPI fallback also failed:", rapidApiError);
-        
-        // Return mock data as final fallback
-        console.log("Using mock data as final fallback");
-        return mockSearchResults;
-      }
-    
-    // Return mock data as fallback if external APIs are disabled
-    console.log("Using mock data as fallback");
-    return mockSearchResults;
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Backend API search successful:', data);
+      return data;
+    }
+  } catch (error) {
+    console.error("❌ Backend API search failed:", error);
   }
+
+  // Fallback to RapidAPI if backend fails or external APIs are enabled
+  if (USE_EXTERNAL_APIS) {
+    console.log('🔍 Using RapidAPI fallback for search:', query);
+    try {
+      console.log("Trying RapidAPI fallback for query:", query);
+      
+      const ytData = await rapidApiRequest(
+        RAPIDAPI_HOST_YT_SEARCH,
+        '/search',
+        {
+          query: query,
+          type: 'video',
+          sort: sortBy,
+          limit: '10'
+        }
+      );
+
+      console.log("RapidAPI response:", ytData);
+
+      if (!ytData || (!ytData.contents && !ytData.videos && !ytData.items)) {
+        throw new Error("Invalid response from YouTube API");
+      }
+
+      // Handle different response formats from different RapidAPI endpoints
+      let videos = ytData.contents || ytData.videos || ytData.items || [];
+      
+      // Map YouTube results to our Track schema
+      const tracks: Track[] = videos
+        .filter((item: any) => item.type === 'video' || item.videoId || item.id)
+        .slice(0, 10)
+        .map((item: any) => {
+          const video = item.video || item;
+          return {
+            id: video.videoId || video.id || Math.random().toString(36),
+            videoId: video.videoId || video.id,
+            title: video.title || 'Unknown Title',
+            artist: video.author?.name || video.channelTitle || video.channel?.name || 'Unknown Artist',
+            thumbnailUrl: video.thumbnails?.[0]?.url || video.thumbnail || video.thumbnails?.high?.url,
+            duration: video.lengthSeconds || video.duration || 0,
+            views: video.viewCount || video.viewCountText ? parseInt(String(video.viewCount || video.viewCountText).replace(/[^0-9]/g, '')) : 0,
+            description: video.description || video.shortDescription || '',
+            publishDate: video.publishedTimeText || video.publishedAt || '',
+          };
+        });
+
+      const mainResult = tracks.length > 0 ? tracks[0] : null;
+      const otherResults = tracks.length > 1 ? tracks.slice(1) : [];
+
+      if (!mainResult) {
+        throw new Error("No results found");
+      }
+
+      return {
+        mainResult,
+        otherResults
+      };
+    } catch (rapidApiError) {
+      console.error("RapidAPI fallback also failed:", rapidApiError);
+    }
+  }
+  
+  // Final fallback to mock data
+  console.log("Using mock data as final fallback");
+  return mockSearchResults;
 }
 
 /**
